@@ -11,7 +11,12 @@ A beautiful macOS menu bar app for keyboard layout switching and text manipulati
 
 ## Installation
 
-### Option 1: Download from Releases
+### Option 1: Homebrew (Recommended)
+```bash
+brew install dmrkv/teximo/teximo
+```
+
+### Option 2: Download from Releases
 1. Go to the [Releases](https://github.com/dmrkv/teximo/releases) page
 2. Download the latest `Teximo.dmg` file
 3. Open the DMG and drag Teximo to your Applications folder
@@ -28,7 +33,7 @@ A beautiful macOS menu bar app for keyboard layout switching and text manipulati
    This is a one-time step - after this, Teximo will launch normally!
 5. Launch Teximo from Applications
 
-### Option 2: Build from Source
+### Option 3: Build from Source
 1. Clone this repository
 2. Open `Teximo.xcodeproj` in Xcode
 3. Build and run (Cmd+R)
