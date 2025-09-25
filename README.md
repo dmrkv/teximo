@@ -12,7 +12,7 @@ A beautiful macOS menu bar app for keyboard layout switching and text manipulati
 ## Installation
 
 ### Option 1: Download from Releases
-1. Go to the [Releases](https://github.com/yourusername/teximo/releases) page
+1. Go to the [Releases](https://github.com/dmrkv/teximo/releases) page
 2. Download the latest `Teximo.dmg` file
 3. Open the DMG and drag Teximo to your Applications folder
 4. Launch Teximo from Applications
