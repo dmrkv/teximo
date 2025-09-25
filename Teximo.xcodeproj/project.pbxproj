@@ -25,11 +25,13 @@
 		D7D0036A43B5A151D61470D9 /* SimpleHotkeyDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */; };
 		EDC581511B8EC6D69ADB87FF /* SimpleAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A5EC2C5FF2CEF75110B7A /* SimpleAppDelegate.swift */; };
 		F9AE8FC86F574ADB9141DC91 /* SimpleHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */; };
+		BF2A349CB6AA45358B51427D /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHotkeyDetector.swift; sourceTree = "<group>"; };
 		0C535EE588FFE62ECE6293D9 /* TimerBasedHotkeyDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBasedHotkeyDetector.swift; sourceTree = "<group>"; };
+		960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
 		270B9AA91773862B907CC83C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37B44F63991DF2D38B5A59E2 /* TextActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextActions.swift; sourceTree = "<group>"; };
 		5BE0FC2957C96F6E0DC7A0A3 /* CaseToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaseToggle.swift; sourceTree = "<group>"; };
@@ -63,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				98EFA333F86EA62BB228E9B3 /* AccessibilityHelper.swift */,
+				960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */,
 				270B9AA91773862B907CC83C /* AppDelegate.swift */,
 				E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */,
 				E518EA0FC234F6411EED1F4B /* AppIcon.png */,
@@ -166,6 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D79ACE5DE14C4572E7DE940 /* AccessibilityHelper.swift in Sources */,
+				BF2A349CB6AA45358B51427D /* AccessibilityPermissionWindow.swift in Sources */,
 				5FA912877F32F6444D46A6E0 /* AppDelegate.swift in Sources */,
 				82511E26FB4A956AE299C45B /* AppIconGenerator.swift in Sources */,
 				4715C75B0747A25FE3A20435 /* CaseToggle.swift in Sources */,
