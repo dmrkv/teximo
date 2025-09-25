@@ -15,9 +15,17 @@ A beautiful macOS menu bar app for keyboard layout switching and text manipulati
 1. Go to the [Releases](https://github.com/dmrkv/teximo/releases) page
 2. Download the latest `Teximo.dmg` file
 3. Open the DMG and drag Teximo to your Applications folder
-4. **Important**: Due to macOS security, you'll see a warning when first launching:
-   - **Right-click** on Teximo.app and select **"Open"**
-   - Or go to System Preferences → Security & Privacy → General and click **"Open Anyway"**
+4. **🚨 IMPORTANT - Security Warning Fix:**
+   
+   When you first try to launch Teximo, macOS will show a security warning:
+   > "Teximo" cannot be opened because the developer cannot be verified.
+   
+   **To fix this, you MUST:**
+   - **Right-click** on Teximo.app in Applications folder
+   - Select **"Open"** from the context menu
+   - Click **"Open"** in the security dialog
+   
+   This is a one-time step - after this, Teximo will launch normally!
 5. Launch Teximo from Applications
 
 ### Option 2: Build from Source
@@ -41,6 +49,22 @@ Once permissions are granted, Teximo will appear in your menu bar with a "T" ico
 
 - **⌘+Shift**: Switch between keyboard layouts
 - **⌥+Shift**: Select text and press this combination to transliterate between English and Russian
+
+## Troubleshooting
+
+### Security Warning Issues
+If you see "Teximo cannot be opened because the developer cannot be verified":
+1. **Right-click** on Teximo.app in Applications folder
+2. Select **"Open"** from the context menu
+3. Click **"Open"** in the security dialog
+
+### Alternative Method (if right-click doesn't work):
+1. Go to **System Preferences** → **Security & Privacy** → **General**
+2. Look for a message about Teximo being blocked
+3. Click **"Open Anyway"**
+
+### Other Issues
+If you encounter any other issues, please check the [Issues](https://github.com/dmrkv/teximo/issues) page or create a new issue.
 
 ## Requirements
 
