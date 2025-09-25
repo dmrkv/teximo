@@ -1,0 +1,62 @@
+# Xcode
+.DS_Store
+*/build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+profile
+*.moved-aside
+DerivedData/
+.idea/
+*.hmap
+*.xccheckout
+*.xcworkspace
+!default.xcworkspace
+
+# Build products
+build/
+DerivedData/
+
+# App Store Connect
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Distribution
+*.dmg
+*.pkg
+
+# Temporary files
+*.tmp
+*.temp
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+*.icns
+*.iconset/
+
+# Backup files
+*~
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved

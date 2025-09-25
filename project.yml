@@ -1,0 +1,25 @@
+name: Teximo
+options:
+  minimumXcodeGenVersion: 2.38.0
+packages: {}
+targets:
+  Teximo:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: Sources/Teximo
+      - path: Sources/Teximo/SimpleAppDelegate.swift
+      - path: Sources/Teximo/IconGenerator.swift
+      - path: Sources/Teximo/AppIconGenerator.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.teximo.app
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: 5.0
+        INFOPLIST_FILE: Sources/Teximo/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    resources:
+      - path: Sources/Teximo/AppIcon.iconset
+    scheme:
+      testTargets: []
