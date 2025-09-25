@@ -3,11 +3,13 @@ import Cocoa
 class AccessibilityPermissionWindow: NSWindowController {
     private var permissionWindow: NSWindow!
     private var onPermissionGranted: (() -> Void)?
+    private var permissionCheckTimer: Timer?
     
     init(onPermissionGranted: (() -> Void)? = nil) {
         self.onPermissionGranted = onPermissionGranted
         super.init(window: nil)
         setupWindow()
+        startPermissionChecking()
     }
     
     required init?(coder: NSCoder) {
@@ -23,7 +25,7 @@ class AccessibilityPermissionWindow: NSWindowController {
             defer: false
         )
         
-        permissionWindow.title = "Teximo - Accessibility Permission Required"
+        permissionWindow.title = "Teximo"
         permissionWindow.titlebarAppearsTransparent = true
         permissionWindow.isMovableByWindowBackground = true
         permissionWindow.center()
@@ -55,9 +57,39 @@ class AccessibilityPermissionWindow: NSWindowController {
     private func createContentView() -> NSView {
         let containerView = NSView()
         
-        // App icon
+        // App icon - use the main app icon instead of menu bar icon
         let iconView = NSImageView()
-        iconView.image = IconGenerator.createMenuBarIcon()
+        if let appIcon = NSImage(named: "AppIcon") {
+            iconView.image = appIcon
+        } else {
+            // Fallback to a simple "T" icon with black text on white background
+            let iconSize = NSSize(width: 64, height: 64)
+            let iconImage = NSImage(size: iconSize)
+            iconImage.lockFocus()
+            
+            // White background
+            NSColor.white.setFill()
+            NSRect(origin: .zero, size: iconSize).fill()
+            
+            // Black "T" in the center
+            let font = NSFont.systemFont(ofSize: 48, weight: .bold)
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: NSColor.black
+            ]
+            let text = "T"
+            let textSize = text.size(withAttributes: attributes)
+            let textRect = NSRect(
+                x: (iconSize.width - textSize.width) / 2,
+                y: (iconSize.height - textSize.height) / 2 - 2,
+                width: textSize.width,
+                height: textSize.height
+            )
+            text.draw(in: textRect, withAttributes: attributes)
+            
+            iconImage.unlockFocus()
+            iconView.image = iconImage
+        }
         iconView.imageScaling = .scaleProportionallyUpOrDown
         iconView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(iconView)
@@ -74,14 +106,13 @@ class AccessibilityPermissionWindow: NSWindowController {
         let descriptionLabel = NSTextField(wrappingLabelWithString: """
         Teximo needs accessibility permissions to:
         • Switch keyboard layouts with ⌘+Shift
-        • Transliterate text with ⌥+Shift  
-        • Toggle text case with Ctrl+Shift
+        • Transliterate text with ⌥+Shift
         
         Please follow the steps below to enable these permissions.
         """)
         descriptionLabel.font = NSFont.systemFont(ofSize: 14)
         descriptionLabel.textColor = .secondaryLabelColor
-        descriptionLabel.alignment = .center
+        descriptionLabel.alignment = .left
         descriptionLabel.maximumNumberOfLines = 0
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(descriptionLabel)
@@ -97,13 +128,13 @@ class AccessibilityPermissionWindow: NSWindowController {
         // Set up constraints
         NSLayoutConstraint.activate([
             // Icon
-            iconView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            iconView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
             iconView.centerXAnchor.constraint(equalTo: containerView.centerXAnchor),
             iconView.widthAnchor.constraint(equalToConstant: 64),
             iconView.heightAnchor.constraint(equalToConstant: 64),
             
             // Title
-            titleLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 20),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             
@@ -134,9 +165,7 @@ class AccessibilityPermissionWindow: NSWindowController {
         let steps = [
             "1. Click 'Open System Settings' below",
             "2. Navigate to Privacy & Security → Accessibility",
-            "3. Click the lock icon and enter your password",
-            "4. Find 'Teximo' in the list and check the box",
-            "5. Return to Teximo and click 'Check Again'"
+            "3. Find 'Teximo' in the list and check the box"
         ]
         
         var previousView: NSView?
@@ -151,7 +180,7 @@ class AccessibilityPermissionWindow: NSWindowController {
             ])
             
             if let previous = previousView {
-                stepView.topAnchor.constraint(equalTo: previous.bottomAnchor, constant: 8).isActive = true
+                stepView.topAnchor.constraint(equalTo: previous.bottomAnchor, constant: 16).isActive = true
             } else {
                 stepView.topAnchor.constraint(equalTo: container.topAnchor).isActive = true
             }
@@ -170,18 +199,7 @@ class AccessibilityPermissionWindow: NSWindowController {
         let container = NSView()
         container.translatesAutoresizingMaskIntoConstraints = false
         
-        // Step number circle
-        let numberLabel = NSTextField(labelWithString: "\(number)")
-        numberLabel.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        numberLabel.textColor = .white
-        numberLabel.alignment = .center
-        numberLabel.wantsLayer = true
-        numberLabel.layer?.backgroundColor = NSColor.systemBlue.cgColor
-        numberLabel.layer?.cornerRadius = 10
-        numberLabel.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(numberLabel)
-        
-        // Step text
+        // Step text (no number circle, just the text)
         let textLabel = NSTextField(labelWithString: text)
         textLabel.font = NSFont.systemFont(ofSize: 13)
         textLabel.textColor = .labelColor
@@ -190,14 +208,8 @@ class AccessibilityPermissionWindow: NSWindowController {
         container.addSubview(textLabel)
         
         NSLayoutConstraint.activate([
-            // Number circle
-            numberLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            numberLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
-            numberLabel.widthAnchor.constraint(equalToConstant: 20),
-            numberLabel.heightAnchor.constraint(equalToConstant: 20),
-            
             // Text
-            textLabel.leadingAnchor.constraint(equalTo: numberLabel.trailingAnchor, constant: 12),
+            textLabel.leadingAnchor.constraint(equalTo: container.leadingAnchor),
             textLabel.trailingAnchor.constraint(equalTo: container.trailingAnchor),
             textLabel.centerYAnchor.constraint(equalTo: container.centerYAnchor),
             textLabel.heightAnchor.constraint(equalToConstant: 20)
@@ -217,7 +229,7 @@ class AccessibilityPermissionWindow: NSWindowController {
         openSettingsButton.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(openSettingsButton)
         
-        // Check Again button
+        // Check Again button (fallback if auto-detection doesn't work)
         let checkAgainButton = NSButton(title: "Check Again", target: self, action: #selector(checkPermissionAgain))
         checkAgainButton.bezelStyle = .rounded
         checkAgainButton.font = NSFont.systemFont(ofSize: 14)
@@ -265,9 +277,9 @@ class AccessibilityPermissionWindow: NSWindowController {
     
     @objc private func checkPermissionAgain() {
         if AccessibilityHelper.ensurePermission(promptIfNeeded: false) {
-            // Permission granted!
-            permissionWindow.close()
-            onPermissionGranted?()
+            // Permission granted! Restart the app
+            print("[Teximo] Permission granted, restarting app...")
+            restartApp()
         } else {
             // Still no permission, show a brief message
             let alert = NSAlert()
@@ -278,6 +290,43 @@ class AccessibilityPermissionWindow: NSWindowController {
         }
     }
     
+    private func restartApp() {
+        // Close the permission window
+        permissionWindow.close()
+        
+        // Get the current app path
+        let appPath = Bundle.main.bundlePath
+        
+        // Create a script to restart the app
+        let script = """
+        #!/bin/bash
+        sleep 1
+        open "\(appPath)"
+        """
+        
+        // Write script to temporary file
+        let tempScriptPath = "/tmp/teximo_restart.sh"
+        try? script.write(toFile: tempScriptPath, atomically: true, encoding: .utf8)
+        
+        // Make script executable
+        let task = Process()
+        task.launchPath = "/bin/chmod"
+        task.arguments = ["+x", tempScriptPath]
+        task.launch()
+        task.waitUntilExit()
+        
+        // Execute restart script
+        let restartTask = Process()
+        restartTask.launchPath = "/bin/bash"
+        restartTask.arguments = [tempScriptPath]
+        restartTask.launch()
+        
+        // Quit current instance
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            NSApp.terminate(nil)
+        }
+    }
+    
     @objc private func quitApp() {
         NSApp.terminate(nil)
     }
@@ -285,5 +334,26 @@ class AccessibilityPermissionWindow: NSWindowController {
     func showWindow() {
         permissionWindow.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    private func startPermissionChecking() {
+        // Check permissions every 2 seconds
+        permissionCheckTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            self?.checkPermissionStatus()
+        }
+    }
+    
+    private func checkPermissionStatus() {
+        if AccessibilityHelper.ensurePermission(promptIfNeeded: false) {
+            // Permission granted! Stop checking and restart app
+            print("[Teximo] Permission detected, restarting app...")
+            permissionCheckTimer?.invalidate()
+            permissionCheckTimer = nil
+            restartApp()
+        }
+    }
+    
+    deinit {
+        permissionCheckTimer?.invalidate()
     }
 }

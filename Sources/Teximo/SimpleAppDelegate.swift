@@ -314,8 +314,8 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     
     private func showAccessibilityPermissionWindow() {
         permissionWindow = AccessibilityPermissionWindow { [weak self] in
-            print("[Teximo] Accessibility permission granted, setting up hotkeys")
-            self?.setupHotkeyDetection()
+            print("[Teximo] Accessibility permission granted, app will restart automatically")
+            // The app will restart automatically, so we don't need to set up hotkeys here
             self?.permissionWindow = nil
         }
         permissionWindow?.showWindow()

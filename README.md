@@ -6,7 +6,6 @@ A beautiful macOS menu bar app for keyboard layout switching and text manipulati
 
 - **⌘+Shift**: Switch keyboard layouts instantly
 - **⌥+Shift**: Transliterate text between English and Russian (Cyrillic)
-- **Ctrl+Shift**: Toggle text case (lowercase → Title Case → UPPERCASE)
 - **Smart Detection**: Automatically detects text direction for transliteration
 - **Beautiful UI**: Clean, modern interface with guided setup
 
@@ -39,7 +38,6 @@ Once permissions are granted, Teximo will appear in your menu bar with a "T" ico
 
 - **⌘+Shift**: Switch between keyboard layouts
 - **⌥+Shift**: Select text and press this combination to transliterate between English and Russian
-- **Ctrl+Shift**: Select text and press this combination to cycle through text cases
 
 ## Requirements
 
