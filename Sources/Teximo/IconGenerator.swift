@@ -25,7 +25,7 @@ class IconGenerator {
         let text = "T"
         let textSize = text.size(withAttributes: attributes)
         let textRect = NSRect(
-            x: (size.width - textSize.width) / 2,
+            x: (size.width - textSize.width) / 2 - 0.5, // Move T 0.5px left for better centering
             y: (size.height - textSize.height) / 2, // Move T 1px up (removed the -1)
             width: textSize.width,
             height: textSize.height
