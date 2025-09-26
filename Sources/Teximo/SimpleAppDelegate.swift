@@ -304,35 +304,65 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func isStartupEnabled() -> Bool {
-        // For now, we'll check the UserDefaults preference
-        // SMLoginItemSetEnabled doesn't have a direct way to check current state
-        // The actual Login Items state will be managed by the system
+        // Check if the app is in Login Items using AppleScript
+        let script = """
+        tell application "System Events"
+            get the name of every login item
+        end tell
+        """
+        
+        let appleScript = NSAppleScript(source: script)
+        let result = appleScript?.executeAndReturnError(nil)
+        
+        if let loginItems = result?.stringValue {
+            return loginItems.contains("Teximo")
+        }
+        
         return UserDefaults.standard.bool(forKey: "TeximoStartupEnabled")
     }
     
     private func setStartupEnabled(_ enabled: Bool) {
-        let bundleIdentifier = Bundle.main.bundleIdentifier ?? "dev.teximo.app"
+        let appPath = Bundle.main.bundlePath
         
-        // Use SMLoginItemSetEnabled to add/remove from Login Items
-        let success = SMLoginItemSetEnabled(bundleIdentifier as CFString, enabled)
-        
-        if success {
-            if enabled {
+        if enabled {
+            // Add to Login Items using AppleScript
+            let script = """
+            tell application "System Events"
+                make login item at end with properties {path:"\(appPath)", hidden:false}
+            end tell
+            """
+            
+            let appleScript = NSAppleScript(source: script)
+            let result = appleScript?.executeAndReturnError(nil)
+            
+            if result != nil {
                 print("[Teximo] Successfully added to Login Items - app will start automatically")
             } else {
-                print("[Teximo] Successfully removed from Login Items - app will not start automatically")
-            }
-        } else {
-            print("[Teximo] Failed to modify Login Items")
-            if enabled {
+                print("[Teximo] Failed to add to Login Items")
                 print("[Teximo] You may need to manually add Teximo to Login Items:")
                 print("[Teximo] 1. Go to System Settings > Users & Groups > Login Items")
                 print("[Teximo] 2. Click the '+' button")
                 print("[Teximo] 3. Select Teximo.app from Applications folder")
             }
+        } else {
+            // Remove from Login Items using AppleScript
+            let script = """
+            tell application "System Events"
+                delete login item "Teximo"
+            end tell
+            """
+            
+            let appleScript = NSAppleScript(source: script)
+            let result = appleScript?.executeAndReturnError(nil)
+            
+            if result != nil {
+                print("[Teximo] Successfully removed from Login Items - app will not start automatically")
+            } else {
+                print("[Teximo] Failed to remove from Login Items")
+            }
         }
         
-        // Also store the preference for UI state
+        // Store the preference for UI state
         UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
     }
     
