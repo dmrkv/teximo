@@ -18,52 +18,75 @@ func createAppIcon() -> NSImage? {
     
     image.lockFocus()
     
-    // Create the main rounded rectangle background
-    let rect = NSRect(x: 64, y: 64, width: 896, height: 896)
+    // Create the main rounded rectangle background (scaled down by 1px from top)
+    let rect = NSRect(x: 64, y: 65, width: 896, height: 895) // Reduced height by 1px, moved down by 1px
     let path = NSBezierPath(roundedRect: rect, xRadius: 180, yRadius: 180)
     
-    // Create gradient background
+    // Create gradient background (inverted - dark background)
     let gradient = NSGradient(colors: [
-        NSColor(red: 0.95, green: 0.95, blue: 0.95, alpha: 1.0), // Light gray
-        NSColor(red: 0.98, green: 0.98, blue: 0.98, alpha: 1.0)  // Very light gray
+        NSColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0), // Dark gray
+        NSColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0)  // Very dark gray
     ])
     gradient?.draw(in: path, angle: 135)
     
     // Add subtle inner shadow effect
-    let innerRect = NSRect(x: 80, y: 80, width: 864, height: 864)
+    let innerRect = NSRect(x: 80, y: 81, width: 864, height: 863) // Adjusted for new rect
     let innerPath = NSBezierPath(roundedRect: innerRect, xRadius: 160, yRadius: 160)
-    NSColor.black.withAlphaComponent(0.05).setStroke()
+    NSColor.white.withAlphaComponent(0.1).setStroke() // Light stroke for dark background
     innerPath.lineWidth = 2
     innerPath.stroke()
     
-    // Create the "T" with serif font
+    // Create the "T" with serif font (transparent/cutout effect)
     let font = NSFont(name: "Times New Roman", size: 650) ?? NSFont.systemFont(ofSize: 650, weight: .bold)
     let attributes: [NSAttributedString.Key: Any] = [
         .font: font,
-        .foregroundColor: NSColor.black
+        .foregroundColor: NSColor.clear // Transparent T
     ]
     
     let text = "T"
     let textSize = text.size(withAttributes: attributes)
     let textRect = NSRect(
         x: (size.width - textSize.width) / 2,
-        y: (size.height - textSize.height) / 2 - 20, // Better vertical centering
+        y: (size.height - textSize.height) / 2 - 20, // Keep T in same position
         width: textSize.width,
         height: textSize.height
     )
     
-    // Add text shadow for depth
-    let shadow = NSShadow()
-    shadow.shadowColor = NSColor.black.withAlphaComponent(0.3)
-    shadow.shadowOffset = NSSize(width: 8, height: -8)
-    shadow.shadowBlurRadius = 20
+    // Create a mask for the T to cut it out of the background
+    let maskImage = NSImage(size: size)
+    maskImage.lockFocus()
     
-    var textAttributes = attributes
-    textAttributes[.shadow] = shadow
-    text.draw(in: textRect, withAttributes: textAttributes)
+    // Fill with black (opaque)
+    NSColor.black.setFill()
+    NSRect(origin: .zero, size: size).fill()
+    
+    // Draw T in white (transparent in final result)
+    let maskAttributes: [NSAttributedString.Key: Any] = [
+        .font: font,
+        .foregroundColor: NSColor.white
+    ]
+    text.draw(in: textRect, withAttributes: maskAttributes)
+    
+    maskImage.unlockFocus()
+    
+    // Apply the mask to cut out the T
+    let context = NSGraphicsContext.current?.cgContext
+    context?.saveGState()
+    
+    // Draw the background
+    gradient?.draw(in: path, angle: 135)
+    
+    // Apply mask to cut out T
+    if let maskCGImage = maskImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+        context?.clip(to: NSRect(origin: .zero, size: size), mask: maskCGImage)
+        NSColor.clear.setFill() // This will be transparent
+        NSRect(origin: .zero, size: size).fill()
+    }
+    
+    context?.restoreGState()
     
     // Add subtle border
-    NSColor.black.withAlphaComponent(0.1).setStroke()
+    NSColor.white.withAlphaComponent(0.2).setStroke() // Light border for dark background
     path.lineWidth = 4
     path.stroke()
     
