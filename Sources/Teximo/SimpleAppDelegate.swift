@@ -304,25 +304,36 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func isStartupEnabled() -> Bool {
-        // For now, we'll use a simple approach with UserDefaults
-        // The SMLoginItemSetEnabled API requires the app to be in a specific location
-        // and is more complex to implement properly
+        // For now, we'll check the UserDefaults preference
+        // SMLoginItemSetEnabled doesn't have a direct way to check current state
+        // The actual Login Items state will be managed by the system
         return UserDefaults.standard.bool(forKey: "TeximoStartupEnabled")
     }
     
     private func setStartupEnabled(_ enabled: Bool) {
-        // Store the preference
-        UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
+        let bundleIdentifier = Bundle.main.bundleIdentifier ?? "dev.teximo.app"
         
-        if enabled {
-            print("[Teximo] Startup enabled - user will need to manually add to Login Items")
-            print("[Teximo] To enable auto-start:")
-            print("[Teximo] 1. Go to System Preferences > Users & Groups > Login Items")
-            print("[Teximo] 2. Click the '+' button")
-            print("[Teximo] 3. Select Teximo.app from Applications folder")
+        // Use SMLoginItemSetEnabled to add/remove from Login Items
+        let success = SMLoginItemSetEnabled(bundleIdentifier as CFString, enabled)
+        
+        if success {
+            if enabled {
+                print("[Teximo] Successfully added to Login Items - app will start automatically")
+            } else {
+                print("[Teximo] Successfully removed from Login Items - app will not start automatically")
+            }
         } else {
-            print("[Teximo] Startup disabled")
+            print("[Teximo] Failed to modify Login Items")
+            if enabled {
+                print("[Teximo] You may need to manually add Teximo to Login Items:")
+                print("[Teximo] 1. Go to System Settings > Users & Groups > Login Items")
+                print("[Teximo] 2. Click the '+' button")
+                print("[Teximo] 3. Select Teximo.app from Applications folder")
+            }
         }
+        
+        // Also store the preference for UI state
+        UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
     }
     
     private func showAccessibilityPermissionWindow() {
