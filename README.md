@@ -13,7 +13,7 @@ A seamless macOS menu bar app for keyboard layout switching and text manipulatio
 
 ### Option 1: Homebrew (Recommended)
 ```bash
-brew install dmrkv/teximo/teximo
+brew install dmrkv/teximo
 ```
 
 > **Note**: This installs Teximo from the Homebrew tap. Make sure you have Homebrew installed first.

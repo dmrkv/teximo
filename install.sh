@@ -17,7 +17,7 @@ fi
 
 # Install Teximo from the Homebrew tap
 echo "📦 Installing Teximo from Homebrew tap..."
-brew install dmrkv/teximo/teximo
+brew install dmrkv/teximo
 
 echo ""
 echo "✅ Teximo installed successfully!"
