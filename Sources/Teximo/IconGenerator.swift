@@ -7,36 +7,67 @@ class IconGenerator {
         
         image.lockFocus()
         
-        // Create rounded rectangle stroke (no fill)
-        let rect = NSRect(x: 1, y: 1, width: 16, height: 16)
+        // Create rounded rectangle with dark fill (scaled down by 1px from top)
+        let rect = NSRect(x: 1, y: 2, width: 16, height: 15) // Reduced height by 1px, moved down by 1px
         let path = NSBezierPath(roundedRect: rect, xRadius: 3, yRadius: 3)
         
-        // Stroke with dark color
-        NSColor.controlTextColor.setStroke()
-        path.lineWidth = 1.5
-        path.stroke()
+        // Fill with dark color
+        NSColor.black.setFill()
+        path.fill()
         
-        // Draw "T" in dark color
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 12, weight: .bold),
-            .foregroundColor: NSColor.controlTextColor
+        // Create a mask for the T to cut it out
+        let maskImage = NSImage(size: size)
+        maskImage.lockFocus()
+        
+        // Fill with black (opaque)
+        NSColor.black.setFill()
+        NSRect(origin: .zero, size: size).fill()
+        
+        // Draw T in white (transparent in final result)
+        let font = NSFont.systemFont(ofSize: 12, weight: .bold)
+        let maskAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: NSColor.white
         ]
         
         let text = "T"
-        let textSize = text.size(withAttributes: attributes)
+        let textSize = text.size(withAttributes: maskAttributes)
         let textRect = NSRect(
             x: (size.width - textSize.width) / 2,
-            y: (size.height - textSize.height) / 2 - 1,
+            y: (size.height - textSize.height) / 2 - 1, // Keep T in same position
             width: textSize.width,
             height: textSize.height
         )
         
-        text.draw(in: textRect, withAttributes: attributes)
+        text.draw(in: textRect, withAttributes: maskAttributes)
+        maskImage.unlockFocus()
+        
+        // Apply the mask to cut out the T
+        let context = NSGraphicsContext.current?.cgContext
+        context?.saveGState()
+        
+        // Draw the dark background
+        NSColor.black.setFill()
+        path.fill()
+        
+        // Apply mask to cut out T
+        if let maskCGImage = maskImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+            context?.clip(to: NSRect(origin: .zero, size: size), mask: maskCGImage)
+            NSColor.clear.setFill() // This will be transparent
+            NSRect(origin: .zero, size: size).fill()
+        }
+        
+        context?.restoreGState()
+        
+        // Add subtle border
+        NSColor.white.withAlphaComponent(0.3).setStroke()
+        path.lineWidth = 0.5
+        path.stroke()
         
         image.unlockFocus()
         
-        // Make it a template image so it adapts to dark/light mode
-        image.isTemplate = true
+        // Don't make it a template image since we want the specific dark design
+        image.isTemplate = false
         
         return image
     }
