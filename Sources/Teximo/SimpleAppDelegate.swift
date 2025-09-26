@@ -93,6 +93,7 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         let hasShift = flags.contains(.shift)
         let hasCmd = flags.contains(.command)
         let hasOption = flags.contains(.option)
+        let hasControl = flags.contains(.control)
         
         // Check for Cmd+Shift combination (layout switching)
         if hasShift && hasCmd {
@@ -104,8 +105,16 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
             // Trigger layout switch
             switchLayout()
         }
-        // Check for Option+Shift+T combination (transliteration)
-        // This will be handled in handleKeyDown for the 'T' key
+        // Check for Control+Shift combination (transliteration)
+        else if hasShift && hasControl {
+            print("[Teximo] Control+Shift detected via hotkey")
+            let logPath = "/tmp/teximo_debug.log"
+            let logMessage = "[Teximo] Control+Shift detected via hotkey\n"
+            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
+            
+            // Trigger transliteration
+            checkAndTransliterateSelectedText()
+        }
         // If neither Option+Shift nor Cmd+Shift, cancel any pending transliteration
         else {
             transliterationTimer?.invalidate()
@@ -114,39 +123,8 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func handleKeyDown(_ event: NSEvent) {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        let hasShift = flags.contains(.shift)
-        let hasOption = flags.contains(.option)
-        
-        // Check for Option+Shift+T combination (transliteration)
-        if event.keyCode == 17 && hasShift && hasOption { // 17 = 'T' key
-            print("[Teximo] Option+Shift+T detected - triggering transliteration")
-            let logPath = "/tmp/teximo_debug.log"
-            let logMessage = "[Teximo] Option+Shift+T detected - triggering transliteration\n"
-            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            
-            // Trigger transliteration
-            checkAndTransliterateSelectedText()
-            return
-        }
-        
-        // Check if user is pressing arrow keys while holding Option+Shift (text selection)
-        // Arrow key codes: 123=left, 124=right, 125=down, 126=up
-        let arrowKeys: Set<UInt16> = [123, 124, 125, 126]
-        
-        if arrowKeys.contains(event.keyCode) && hasShift && hasOption {
-            print("[Teximo] Arrow key detected with Option+Shift - user is selecting text")
-            let logPath = "/tmp/teximo_debug.log"
-            let logMessage = "[Teximo] Arrow key detected with Option+Shift - user is selecting text\n"
-            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            
-            isSelectingText = true
-            
-            // Reset the flag after a longer delay to ensure selection is complete
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                self?.isSelectingText = false
-            }
-        }
+        // No longer needed - using Ctrl+Shift instead of Option+Shift+T
+        // This method is kept for potential future use
     }
     
     private func checkAndTransliterateSelectedText() {

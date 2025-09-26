@@ -38,7 +38,7 @@ class Teximo < Formula
       
       🎯 Hotkeys:
       - ⌘+Shift: Switch keyboard layouts
-      - ⌥+Shift+T: Transliterate selected text
+      - Ctrl+Shift: Transliterate selected text
       
       Teximo has been installed to:
         #{prefix}/Teximo.app
