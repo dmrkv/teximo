@@ -15,23 +15,15 @@ class IconGenerator {
         NSColor.white.setFill()
         path.fill()
         
-        // Create a mask for the T to cut it out
-        let maskImage = NSImage(size: size)
-        maskImage.lockFocus()
-        
-        // Fill with black (opaque)
-        NSColor.black.setFill()
-        NSRect(origin: .zero, size: size).fill()
-        
-        // Draw T in white (transparent in final result)
+        // Draw T in black (this will be the "cutout" effect)
         let font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        let maskAttributes: [NSAttributedString.Key: Any] = [
+        let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
-            .foregroundColor: NSColor.white
+            .foregroundColor: NSColor.black
         ]
         
         let text = "T"
-        let textSize = text.size(withAttributes: maskAttributes)
+        let textSize = text.size(withAttributes: attributes)
         let textRect = NSRect(
             x: (size.width - textSize.width) / 2,
             y: (size.height - textSize.height) / 2 - 1, // Keep T in same position
@@ -39,25 +31,7 @@ class IconGenerator {
             height: textSize.height
         )
         
-        text.draw(in: textRect, withAttributes: maskAttributes)
-        maskImage.unlockFocus()
-        
-        // Apply the mask to cut out the T
-        let context = NSGraphicsContext.current?.cgContext
-        context?.saveGState()
-        
-        // Draw the white background
-        NSColor.white.setFill()
-        path.fill()
-        
-        // Apply mask to cut out T
-        if let maskCGImage = maskImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
-            context?.clip(to: NSRect(origin: .zero, size: size), mask: maskCGImage)
-            NSColor.clear.setFill() // This will be transparent
-            NSRect(origin: .zero, size: size).fill()
-        }
-        
-        context?.restoreGState()
+        text.draw(in: textRect, withAttributes: attributes)
         
         // Add subtle border
         NSColor.black.withAlphaComponent(0.2).setStroke()
