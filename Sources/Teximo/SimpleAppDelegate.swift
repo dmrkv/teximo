@@ -53,15 +53,24 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         switchItem.target = self
         statusMenu.addItem(switchItem)
         
-        let transliterationItem = NSMenuItem(title: "Transliterate Text", action: #selector(testTransliteration), keyEquivalent: "")
-        transliterationItem.keyEquivalentModifierMask = [.control, .shift]
+        let transliterationItem = NSMenuItem(title: "Transliterate Text", action: #selector(testTransliteration), keyEquivalent: "⇧")
+        transliterationItem.keyEquivalentModifierMask = [.control]
         transliterationItem.target = self
         statusMenu.addItem(transliterationItem)
         statusMenu.addItem(NSMenuItem.separator())
 
-        let aboutItem = NSMenuItem(title: "Teximo", action: nil, keyEquivalent: "")
+        // Get app version
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+        let aboutItem = NSMenuItem(title: "Teximo v\(version)", action: nil, keyEquivalent: "")
         aboutItem.isEnabled = false
         statusMenu.addItem(aboutItem)
+        
+        // Add startup checkbox
+        let startupItem = NSMenuItem(title: "Start Teximo when macOS starts", action: #selector(toggleStartup), keyEquivalent: "")
+        startupItem.target = self
+        startupItem.state = isStartupEnabled() ? .on : .off
+        statusMenu.addItem(startupItem)
+        
         statusMenu.addItem(NSMenuItem.separator())
         statusMenu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
 
@@ -281,6 +290,28 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     
     @objc private func quit() {
         NSApp.terminate(nil)
+    }
+    
+    @objc private func toggleStartup() {
+        let isEnabled = isStartupEnabled()
+        setStartupEnabled(!isEnabled)
+        
+        // Update the menu item state
+        if let startupItem = statusMenu.items.first(where: { $0.title.contains("Start Teximo when macOS starts") }) {
+            startupItem.state = !isEnabled ? .on : .off
+        }
+    }
+    
+    private func isStartupEnabled() -> Bool {
+        // For now, return false - we'll implement this later
+        // This is a simplified version that doesn't use CoreServices APIs
+        return false
+    }
+    
+    private func setStartupEnabled(_ enabled: Bool) {
+        // For now, do nothing - we'll implement this later
+        // This is a simplified version that doesn't use CoreServices APIs
+        print("[Teximo] Startup setting changed to: \(enabled)")
     }
     
     private func showAccessibilityPermissionWindow() {
