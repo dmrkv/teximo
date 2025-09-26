@@ -11,14 +11,20 @@ class Teximo < Formula
     # Mount the DMG
     system "hdiutil", "attach", "-nobrowse", "-quiet", cached_download
     
+    # Find the actual volume name (macOS may rename it to "Teximo 1", "Teximo 2", etc.)
+    volume_name = Dir.glob("/Volumes/Teximo*").first
+    if volume_name.nil?
+      odie "Could not find mounted Teximo volume"
+    end
+    
     # Copy the app to the Applications folder
-    system "cp", "-R", "/Volumes/Teximo/Teximo.app", "#{prefix}/"
+    system "cp", "-R", "#{volume_name}/Teximo.app", "#{prefix}/"
     
     # Create a symlink in /usr/local/bin for easy access
     bin.install_symlink "#{prefix}/Teximo.app/Contents/MacOS/Teximo" => "teximo"
     
     # Unmount the DMG
-    system "hdiutil", "detach", "-quiet", "/Volumes/Teximo"
+    system "hdiutil", "detach", "-quiet", volume_name
   end
 
   def caveats
