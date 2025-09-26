@@ -54,7 +54,7 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         statusMenu.addItem(switchItem)
         
         let transliterationItem = NSMenuItem(title: "Transliterate Text", action: #selector(testTransliteration), keyEquivalent: "⇧")
-        transliterationItem.keyEquivalentModifierMask = [.option]
+        transliterationItem.keyEquivalentModifierMask = [.control]
         transliterationItem.target = self
         statusMenu.addItem(transliterationItem)
         statusMenu.addItem(NSMenuItem.separator())
