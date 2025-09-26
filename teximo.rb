@@ -36,10 +36,6 @@ class Teximo < Formula
       
       This is a one-time step - after this, Teximo will launch normally!
       
-      🎯 Hotkeys:
-      - ⌘+Shift: Switch keyboard layouts
-      - ⌥+Shift+T: Transliterate selected text
-      
       Teximo has been installed to:
         #{prefix}/Teximo.app
       

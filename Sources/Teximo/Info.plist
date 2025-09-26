@@ -25,7 +25,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAccessibilityUsageDescription</key>
-	<string>Teximo needs accessibility permissions to switch keyboard layouts and transliterate text using keyboard shortcuts.</string>
+	<string>Teximo needs accessibility permissions to switch keyboard layouts (⌘+Shift) and transliterate text (⌥+Shift+T) using keyboard shortcuts.</string>
 	<key>NSMainNibFile</key>
 	<string></string>
 </dict>
