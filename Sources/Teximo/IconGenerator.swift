@@ -7,8 +7,8 @@ class IconGenerator {
         
         image.lockFocus()
         
-        // Create rounded rectangle with white fill (scaled down by 1px from top)
-        let rect = NSRect(x: 1, y: 2, width: 16, height: 15) // Reduced height by 1px, moved down by 1px
+        // Create rounded rectangle with white fill (1px smaller)
+        let rect = NSRect(x: 1, y: 2, width: 15, height: 14) // 1px smaller in both dimensions
         let path = NSBezierPath(roundedRect: rect, xRadius: 3, yRadius: 3)
         
         // Fill with white color
@@ -26,7 +26,7 @@ class IconGenerator {
         let textSize = text.size(withAttributes: attributes)
         let textRect = NSRect(
             x: (size.width - textSize.width) / 2,
-            y: (size.height - textSize.height) / 2 - 1, // Keep T in same position
+            y: (size.height - textSize.height) / 2, // Move T 1px up (removed the -1)
             width: textSize.width,
             height: textSize.height
         )
