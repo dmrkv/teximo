@@ -6,7 +6,6 @@ class Teximo < Formula
   version "1.1.0"
   license "MIT"
 
-  depends_on macos: ">= :ventura"
 
   def install
     # Mount the DMG
