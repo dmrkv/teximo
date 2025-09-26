@@ -1,4 +1,5 @@
 import Cocoa
+import ServiceManagement
 
 class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
@@ -303,15 +304,25 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func isStartupEnabled() -> Bool {
-        // For now, return false - we'll implement this later
-        // This is a simplified version that doesn't use CoreServices APIs
-        return false
+        // For now, we'll use a simple approach with UserDefaults
+        // The SMLoginItemSetEnabled API requires the app to be in a specific location
+        // and is more complex to implement properly
+        return UserDefaults.standard.bool(forKey: "TeximoStartupEnabled")
     }
     
     private func setStartupEnabled(_ enabled: Bool) {
-        // For now, do nothing - we'll implement this later
-        // This is a simplified version that doesn't use CoreServices APIs
-        print("[Teximo] Startup setting changed to: \(enabled)")
+        // Store the preference
+        UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
+        
+        if enabled {
+            print("[Teximo] Startup enabled - user will need to manually add to Login Items")
+            print("[Teximo] To enable auto-start:")
+            print("[Teximo] 1. Go to System Preferences > Users & Groups > Login Items")
+            print("[Teximo] 2. Click the '+' button")
+            print("[Teximo] 3. Select Teximo.app from Applications folder")
+        } else {
+            print("[Teximo] Startup disabled")
+        }
     }
     
     private func showAccessibilityPermissionWindow() {
