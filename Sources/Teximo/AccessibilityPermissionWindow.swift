@@ -106,7 +106,7 @@ class AccessibilityPermissionWindow: NSWindowController {
         let descriptionLabel = NSTextField(wrappingLabelWithString: """
         Teximo needs accessibility permissions to:
         • Switch keyboard layouts with ⌘+Shift
-        • Transliterate text with ⌥+Shift
+        • Transliterate text with Ctrl+Shift
         
         Please follow the steps below to enable these permissions.
         """)

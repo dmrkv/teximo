@@ -115,7 +115,7 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
             // Trigger transliteration
             checkAndTransliterateSelectedText()
         }
-        // If neither Option+Shift nor Cmd+Shift, cancel any pending transliteration
+        // If neither Control+Shift nor Cmd+Shift, cancel any pending transliteration
         else {
             transliterationTimer?.invalidate()
             transliterationTimer = nil
