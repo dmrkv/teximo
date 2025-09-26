@@ -7,12 +7,12 @@ class IconGenerator {
         
         image.lockFocus()
         
-        // Create rounded rectangle with dark fill (scaled down by 1px from top)
+        // Create rounded rectangle with white fill (scaled down by 1px from top)
         let rect = NSRect(x: 1, y: 2, width: 16, height: 15) // Reduced height by 1px, moved down by 1px
         let path = NSBezierPath(roundedRect: rect, xRadius: 3, yRadius: 3)
         
-        // Fill with dark color
-        NSColor.black.setFill()
+        // Fill with white color
+        NSColor.white.setFill()
         path.fill()
         
         // Create a mask for the T to cut it out
@@ -46,8 +46,8 @@ class IconGenerator {
         let context = NSGraphicsContext.current?.cgContext
         context?.saveGState()
         
-        // Draw the dark background
-        NSColor.black.setFill()
+        // Draw the white background
+        NSColor.white.setFill()
         path.fill()
         
         // Apply mask to cut out T
@@ -60,13 +60,13 @@ class IconGenerator {
         context?.restoreGState()
         
         // Add subtle border
-        NSColor.white.withAlphaComponent(0.3).setStroke()
+        NSColor.black.withAlphaComponent(0.2).setStroke()
         path.lineWidth = 0.5
         path.stroke()
         
         image.unlockFocus()
         
-        // Don't make it a template image since we want the specific dark design
+        // Don't make it a template image since we want the specific white design
         image.isTemplate = false
         
         return image
