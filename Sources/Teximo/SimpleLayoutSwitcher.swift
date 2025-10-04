@@ -3,7 +3,7 @@ import Carbon
 
 final class SimpleLayoutSwitcher {
     static func switchLayout() {
-        print("[Teximo] Switching keyboard layout using Control+Space")
+        print("[Teximo] SimpleLayoutSwitcher: Switching layout programmatically")
         
         // Get all enabled input sources
         guard let inputSources = TISCreateInputSourceList(nil, false)?.takeRetainedValue() as? [TISInputSource] else {

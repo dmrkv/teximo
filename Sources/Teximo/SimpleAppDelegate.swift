@@ -190,21 +190,24 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     
     private func switchLayout() {
         print("[Teximo] Switching keyboard layout using Control+Space")
-        let logPath = "/tmp/teximo_debug.log"
-        let logMessage = "[Teximo] Switching keyboard layout using Control+Space\n"
-        try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
         
-        // Use only Control+Space - this is the most common default shortcut
-        // and won't interfere with other apps like Espanso or ChatGPT
+        // Use a simple approach - simulate Control+Space keystroke
         let spaceKey: CGKeyCode = 49
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            AccessibilityHelper.performKeystroke(keyCode: spaceKey, flags: .maskControl)
-        }
+        // Create the key event
+        let keyDownEvent = CGEvent(keyboardEventSource: nil, virtualKey: spaceKey, keyDown: true)
+        let keyUpEvent = CGEvent(keyboardEventSource: nil, virtualKey: spaceKey, keyDown: false)
+        
+        // Set Control modifier
+        keyDownEvent?.flags = .maskControl
+        keyUpEvent?.flags = .maskControl
+        
+        // Post the events
+        keyDownEvent?.post(tap: .cghidEventTap)
+        usleep(10000) // 10ms delay
+        keyUpEvent?.post(tap: .cghidEventTap)
         
         print("[Teximo] Sent Control+Space keystroke")
-        let sentMessage = "[Teximo] Sent Control+Space keystroke\n"
-        try? sentMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
     }
     
     private func transliterateSelectedText() {
