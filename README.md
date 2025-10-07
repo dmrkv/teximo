@@ -33,7 +33,9 @@ brew install dmrkv/teximo/teximo
    - Click **"Open"** in the security dialog
    
    This is a one-time step - after this, Teximo will launch normally!
-5. Launch Teximo from Applications
+
+   Alternatively after trying to open it you need to go to mac OS Settings → Privacy and Security → Security — "Allow Teximo" or "Open anyway"
+6. Launch Teximo from Applications
 
 ### Option 3: Build from Source
 1. Clone this repository
@@ -46,9 +48,7 @@ When you first launch Teximo, you'll see a permission window guiding you through
 
 1. Click "Open System Settings"
 2. Navigate to Privacy & Security → Accessibility
-3. Click the lock icon and enter your password
 4. Find 'Teximo' in the list and check the box
-5. Return to Teximo and click "Check Again"
 
 ## Usage
 
