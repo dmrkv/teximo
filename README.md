@@ -32,7 +32,7 @@ brew install dmrkv/teximo/teximo
    **To fix this, you MUST:**
    - Go to MacOS Settings (Spotlight → System Settings)
    - Click **"Open"** in the security dialog
-   - In the left sidebar find "Privacy and Security", and then in the right side of the window find "Security" → "Teximo.app" was blocked to protect your Mac. Click on "Open anyway"
+   - In the left sidebar find **Privacy and Security**, and then in the right side of the window find **Security** → "Teximo.app" was blocked to protect your Mac. Click on **Open anyway**
      <img width="827" height="684" alt="Screenshot 2" src="https://github.com/user-attachments/assets/ec415ae2-20f7-4f4f-b71b-aa23f886f4a4" />
    - When you run Teximo next time from Applications, click again on "Open anyway"
      <img width="372" height="440" alt="Screenshot 3" src="https://github.com/user-attachments/assets/6d9de770-a6fd-4a98-a174-9f48d4887a10" />
@@ -62,14 +62,8 @@ Once permissions are granted, Teximo will appear in your menu bar with a "T" ico
 
 ## Troubleshooting
 
-### Security Warning Issues
-If you see "Teximo cannot be opened because the developer cannot be verified":
-1. **Right-click** on Teximo.app in Applications folder
-2. Select **"Open"** from the context menu
-3. Click **"Open"** in the security dialog
-
 ### Alternative Method (if right-click doesn't work):
-1. Go to **System Preferences** → **Security & Privacy** → **General**
+1. Go to **System Preferences** → **Security & Privacy** → **Security**
 2. Look for a message about Teximo being blocked
 3. Click **"Open Anyway"**
 
