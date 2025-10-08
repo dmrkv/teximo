@@ -25,17 +25,20 @@ brew install dmrkv/teximo/teximo
 4. **🚨 IMPORTANT - Security Warning Fix:**
    
    When you first try to launch Teximo, macOS will show a security warning:
-   > "Teximo" cannot be opened because the developer cannot be verified.
+   > "Teximo.app Not Opened"
+   <img width="372" height="344" alt="Screenshot 1" src="https://github.com/user-attachments/assets/6f606280-6f83-4cc0-a141-e013cacbaf69" />
+
    
    **To fix this, you MUST:**
-   - **Right-click** on Teximo.app in Applications folder
-   - Select **"Open"** from the context menu
+   - Go to MacOS Settings (Spotlight → System Settings)
    - Click **"Open"** in the security dialog
-   
-   This is a one-time step - after this, Teximo will launch normally!
+   - In the left sidebar find "Privacy and Security", and then in the right side of the window find "Security" → "Teximo.app" was blocked to protect your Mac. Click on "Open anyway"
+     <img width="827" height="684" alt="Screenshot 2" src="https://github.com/user-attachments/assets/ec415ae2-20f7-4f4f-b71b-aa23f886f4a4" />
+   - When you run Teximo next time from Applications, click again on "Open anyway"
+     <img width="372" height="440" alt="Screenshot 3" src="https://github.com/user-attachments/assets/6d9de770-a6fd-4a98-a174-9f48d4887a10" />
 
-   Alternatively after trying to open it you need to go to mac OS Settings → Privacy and Security → Security — "Allow Teximo" or "Open anyway"
-6. Launch Teximo from Applications
+   This is a one-time step - after this, Teximo will launch normally!
+6. After that launch Teximo from Applications
 
 ### Option 3: Build from Source
 1. Clone this repository
