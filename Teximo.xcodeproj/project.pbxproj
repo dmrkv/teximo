@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		0022578FDB9C8FB2BD05974E /* IconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */; };
-		1D3A3DAFC437E8718F957CCF /* LayoutSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF9A9BB0B1FBEF26409733A7 /* LayoutSwitcher.swift */; };
+
 		2A51C6406D362113DABE2CF1 /* TextActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B44F63991DF2D38B5A59E2 /* TextActions.swift */; };
 		4715C75B0747A25FE3A20435 /* CaseToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE0FC2957C96F6E0DC7A0A3 /* CaseToggle.swift */; };
 		4C8F88D8AC11EEE74D7525A5 /* Transliterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */; };
-		5FA912877F32F6444D46A6E0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 270B9AA91773862B907CC83C /* AppDelegate.swift */; };
-		60D096A6DD780959B8363B3C /* TimerBasedHotkeyDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C535EE588FFE62ECE6293D9 /* TimerBasedHotkeyDetector.swift */; };
+
+
 		6430FD34676C0716232BF99F /* AppIcon.iconset in Resources */ = {isa = PBXBuildFile; fileRef = E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */; };
 		6BB05F09A4141D8E33E51504 /* SimpleLayoutSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B974AFB475F652B5B938348 /* SimpleLayoutSwitcher.swift */; };
 		735E7838B6BEEDA0B7EF3807 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F3559EAB327E14B195E97C /* main.swift */; };
@@ -30,9 +30,9 @@
 
 /* Begin PBXFileReference section */
 		064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHotkeyDetector.swift; sourceTree = "<group>"; };
-		0C535EE588FFE62ECE6293D9 /* TimerBasedHotkeyDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerBasedHotkeyDetector.swift; sourceTree = "<group>"; };
+
 		960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
-		270B9AA91773862B907CC83C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+
 		37B44F63991DF2D38B5A59E2 /* TextActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextActions.swift; sourceTree = "<group>"; };
 		5BE0FC2957C96F6E0DC7A0A3 /* CaseToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaseToggle.swift; sourceTree = "<group>"; };
 		606BCA7E6DDAD523FD3ED921 /* AppIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconGenerator.swift; sourceTree = "<group>"; };
@@ -44,7 +44,7 @@
 		A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHotkeyManager.swift; sourceTree = "<group>"; };
 		AA12020CAAF47A304C276686 /* Teximo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teximo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B393DBE54001F2FD04F23F07 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
-		BF9A9BB0B1FBEF26409733A7 /* LayoutSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSwitcher.swift; sourceTree = "<group>"; };
+
 		CF7791C4CD9B3B9406E439A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = AppIcon.iconset; sourceTree = "<group>"; };
 		E518EA0FC234F6411EED1F4B /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon.png; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 			children = (
 				98EFA333F86EA62BB228E9B3 /* AccessibilityHelper.swift */,
 				960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */,
-				270B9AA91773862B907CC83C /* AppDelegate.swift */,
+
 				E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */,
 				E518EA0FC234F6411EED1F4B /* AppIcon.png */,
 				606BCA7E6DDAD523FD3ED921 /* AppIconGenerator.swift */,
@@ -74,14 +74,14 @@
 				B393DBE54001F2FD04F23F07 /* HotkeyManager.swift */,
 				F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */,
 				CF7791C4CD9B3B9406E439A5 /* Info.plist */,
-				BF9A9BB0B1FBEF26409733A7 /* LayoutSwitcher.swift */,
+
 				83F3559EAB327E14B195E97C /* main.swift */,
 				8D0A5EC2C5FF2CEF75110B7A /* SimpleAppDelegate.swift */,
 				064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */,
 				A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */,
 				9B974AFB475F652B5B938348 /* SimpleLayoutSwitcher.swift */,
 				37B44F63991DF2D38B5A59E2 /* TextActions.swift */,
-				0C535EE588FFE62ECE6293D9 /* TimerBasedHotkeyDetector.swift */,
+
 				F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */,
 				9CB974F0117D2989A1F44476 /* WorkingHotkeyManager.swift */,
 			);
@@ -170,18 +170,18 @@
 			files = (
 				8D79ACE5DE14C4572E7DE940 /* AccessibilityHelper.swift in Sources */,
 				BF2A349CB6AA45358B51427D /* AccessibilityPermissionWindow.swift in Sources */,
-				5FA912877F32F6444D46A6E0 /* AppDelegate.swift in Sources */,
+
 				82511E26FB4A956AE299C45B /* AppIconGenerator.swift in Sources */,
 				4715C75B0747A25FE3A20435 /* CaseToggle.swift in Sources */,
 				781BD5BF9F6D9168364A8C20 /* HotkeyManager.swift in Sources */,
 				0022578FDB9C8FB2BD05974E /* IconGenerator.swift in Sources */,
-				1D3A3DAFC437E8718F957CCF /* LayoutSwitcher.swift in Sources */,
+
 				EDC581511B8EC6D69ADB87FF /* SimpleAppDelegate.swift in Sources */,
 				D7D0036A43B5A151D61470D9 /* SimpleHotkeyDetector.swift in Sources */,
 				F9AE8FC86F574ADB9141DC91 /* SimpleHotkeyManager.swift in Sources */,
 				6BB05F09A4141D8E33E51504 /* SimpleLayoutSwitcher.swift in Sources */,
 				2A51C6406D362113DABE2CF1 /* TextActions.swift in Sources */,
-				60D096A6DD780959B8363B3C /* TimerBasedHotkeyDetector.swift in Sources */,
+
 				4C8F88D8AC11EEE74D7525A5 /* Transliterator.swift in Sources */,
 				9733938794B5AB766A6747EF /* WorkingHotkeyManager.swift in Sources */,
 				735E7838B6BEEDA0B7EF3807 /* main.swift in Sources */,

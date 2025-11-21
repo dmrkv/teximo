@@ -4,10 +4,14 @@ A seamless macOS menu bar app for keyboard layout switching and text manipulatio
 
 ## Features
 
-- **⌘+Shift**: Switch keyboard layouts instantly
-- **Ctrl+Shift**: Transliterate text between English and Russian (Cyrillic)
-- **Smart Detection**: Automatically detects text direction for transliteration
-- **Invisible Operation**: Works seamlessly in the background without interrupting your workflow
+- **⚙️ Customizable Shortcuts**: Configure your own keyboard shortcuts for all actions
+- **🎨 Settings Window**: Unified settings interface for shortcuts, layouts, and startup preferences
+- **⌨️ Smart Layout Switching**: Choose specific keyboard layouts for English and Russian
+- **🔄 Text Transliteration**: Convert selected text between English and Russian (Cyrillic)
+- **🔠 Case Toggle**: Cycle through lowercase, UPPERCASE, Title Case, and Sentence case
+- **🔍 Smart Detection**: Automatically detects text direction for transliteration
+- **👻 Invisible Operation**: Works seamlessly in the background without interrupting your workflow
+- **⚠️ Conflict Detection**: Visual warnings when shortcuts overlap
 
 ## Installation
 
@@ -55,10 +59,23 @@ When you first launch Teximo, you'll see a permission window guiding you through
 
 ## Usage
 
-Once permissions are granted, Teximo will appear in your menu bar with a "T" icon. The app works globally in any application:
+Once permissions are granted, Teximo will appear in your menu bar with a "T" icon.
 
-- **⌘+Shift**: Switch between keyboard layouts
-- **Ctrl+Shift**: Select text and press this combination to transliterate between English and Russian
+### Settings Window
+
+Click the menu bar icon and select **"Settings..."** to:
+- Customize keyboard shortcuts for layout switching, transliteration, and case toggle
+- Choose specific keyboard layouts for English and Russian
+- Enable/disable launching Teximo at macOS startup
+- Reset all settings to defaults
+
+### Default Shortcuts
+
+The app works globally in any application with these default shortcuts (customizable in Settings):
+
+- **⌘⇧** (Cmd+Shift): Switch between keyboard layouts
+- **⌥⇧** (Option+Shift): Transliterate selected text between English and Russian
+- **⌃⇧** (Ctrl+Shift): Toggle case of selected text
 
 ## Troubleshooting
 
@@ -66,6 +83,15 @@ Once permissions are granted, Teximo will appear in your menu bar with a "T" ico
 1. Go to **System Preferences** → **Security & Privacy** → **Security**
 2. Look for a message about Teximo being blocked
 3. Click **"Open Anyway"**
+
+### Layout Switching Popover (macOS Sonoma and later)
+If you see a small popover appearing near your cursor when switching layouts, this is a macOS system feature introduced in Sonoma. Teximo uses direct system APIs that work instantly and don't depend on macOS keyboard shortcuts.
+
+To disable the system popover (optional):
+```bash
+defaults write kCFPreferencesAnyApplication TSMLanguageIndicatorEnabled 0
+```
+After running this command, restart your applications for the change to take effect. This will revert to the older style indicator or hide it completely.
 
 ### Other Issues
 If you encounter any other issues, please check the [Issues](https://github.com/dmrkv/teximo/issues) page or create a new issue.
