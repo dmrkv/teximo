@@ -2,7 +2,7 @@ class Teximo < Formula
   desc "A seamless macOS menu bar app for keyboard layout switching and text transliteration"
   homepage "https://github.com/dmrkv/teximo"
   url "https://github.com/dmrkv/teximo/releases/download/v1.2.2/Teximo-1.5.0.dmg"
-  sha256 "eb70024c6e1bef047f9ea3a9c779e230c96b252f6d164bc4499580fec9381cf5"
+  sha256 "8f998b94004f75bfb46c8b2c19f74812f9e4aa674f48ec90c7994087ab73d47e"
   version "1.5.0"
   license "MIT"
 
