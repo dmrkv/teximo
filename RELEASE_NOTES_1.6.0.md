@@ -54,7 +54,7 @@ brew install dmrkv/teximo/teximo
 
 ## Verification
 
-SHA256: `0e1568b798b74fb35274a50dd3f20bc75550a66f9b480103725715eb3ff2e6db`
+SHA256: `1e04a166aaf6182fb2953cd11027326c2bcb68fe0b7c12e1ed2586586301bcd5`
 
 ---
 
