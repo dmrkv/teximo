@@ -138,48 +138,64 @@ class TeximoSettings {
     private let defaultTransliteration = HotkeyConfig(modifiers: [.option, .shift])
     private let defaultCaseToggle = HotkeyConfig(modifiers: [.control, .shift])
     
-    // Hotkey configurations
-    var layoutSwitchHotkey: HotkeyConfig {
+    // Hotkey configurations (optional - nil means disabled/cleared)
+    var layoutSwitchHotkey: HotkeyConfig? {
         get {
-            if let data = defaults.data(forKey: layoutSwitchKey),
-               let config = try? JSONDecoder().decode(HotkeyConfig.self, from: data) {
-                return config
+            if let data = defaults.data(forKey: layoutSwitchKey) {
+                return try? JSONDecoder().decode(HotkeyConfig.self, from: data)
             }
-            return defaultLayoutSwitch
+            // Return default on first use (when key doesn't exist at all)
+            if !defaults.bool(forKey: "hasSetLayoutSwitchHotkey") {
+                return defaultLayoutSwitch
+            }
+            return nil // Explicitly cleared
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            defaults.set(true, forKey: "hasSetLayoutSwitchHotkey")
+            if let config = newValue, let data = try? JSONEncoder().encode(config) {
                 defaults.set(data, forKey: layoutSwitchKey)
+            } else {
+                defaults.removeObject(forKey: layoutSwitchKey)
             }
         }
     }
     
-    var transliterationHotkey: HotkeyConfig {
+    var transliterationHotkey: HotkeyConfig? {
         get {
-            if let data = defaults.data(forKey: transliterationKey),
-               let config = try? JSONDecoder().decode(HotkeyConfig.self, from: data) {
-                return config
+            if let data = defaults.data(forKey: transliterationKey) {
+                return try? JSONDecoder().decode(HotkeyConfig.self, from: data)
             }
-            return defaultTransliteration
+            if !defaults.bool(forKey: "hasSetTransliterationHotkey") {
+                return defaultTransliteration
+            }
+            return nil
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            defaults.set(true, forKey: "hasSetTransliterationHotkey")
+            if let config = newValue, let data = try? JSONEncoder().encode(config) {
                 defaults.set(data, forKey: transliterationKey)
+            } else {
+                defaults.removeObject(forKey: transliterationKey)
             }
         }
     }
     
-    var caseToggleHotkey: HotkeyConfig {
+    var caseToggleHotkey: HotkeyConfig? {
         get {
-            if let data = defaults.data(forKey: caseToggleKey),
-               let config = try? JSONDecoder().decode(HotkeyConfig.self, from: data) {
-                return config
+            if let data = defaults.data(forKey: caseToggleKey) {
+                return try? JSONDecoder().decode(HotkeyConfig.self, from: data)
             }
-            return defaultCaseToggle
+            if !defaults.bool(forKey: "hasSetCaseToggleHotkey") {
+                return defaultCaseToggle
+            }
+            return nil
         }
         set {
-            if let data = try? JSONEncoder().encode(newValue) {
+            defaults.set(true, forKey: "hasSetCaseToggleHotkey")
+            if let config = newValue, let data = try? JSONEncoder().encode(config) {
                 defaults.set(data, forKey: caseToggleKey)
+            } else {
+                defaults.removeObject(forKey: caseToggleKey)
             }
         }
     }
@@ -216,6 +232,22 @@ class TeximoSettings {
             } else {
                 defaults.removeObject(forKey: selectedLayout2Key)
             }
+        }
+    }
+    
+    // Menu bar icon visibility
+    private let showMenuBarIconKey = "TeximoShowMenuBarIcon"
+    private let hasSetShowMenuBarIconKey = "TeximoHasSetShowMenuBarIcon"
+    var showMenuBarIcon: Bool {
+        get {
+            if !defaults.bool(forKey: hasSetShowMenuBarIconKey) {
+                return true // Default to visible
+            }
+            return defaults.bool(forKey: showMenuBarIconKey)
+        }
+        set {
+            defaults.set(newValue, forKey: showMenuBarIconKey)
+            defaults.set(true, forKey: hasSetShowMenuBarIconKey)
         }
     }
     

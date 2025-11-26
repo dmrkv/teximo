@@ -24,6 +24,9 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     private var lastKnownSelection: String = ""
     private var lastArrowKeyTime: Date = Date.distantPast
     
+    // Settings window
+    private var settingsWindow: SettingsWindow?
+    
     override init() {
         super.init()
         print("[Teximo] SimpleAppDelegate init called")
@@ -42,9 +45,26 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         } else {
             print("[Teximo] Accessibility permission granted, setting up hotkeys")
             setupHotkeyDetection()
+            
+            // If menu bar icon is hidden, show Settings window (only after permissions granted)
+            if !TeximoSettings.shared.showMenuBarIcon {
+                showSettingsWindow()
+            }
         }
         
         print("[Teximo] SimpleAppDelegate applicationDidFinishLaunching - END")
+    }
+    
+    // Handle app reopen (when user clicks app icon or runs 'open' while already running)
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        print("[Teximo] App reopened, hasVisibleWindows: \(flag)")
+        
+        // If menu bar icon is hidden, show Settings window
+        if !TeximoSettings.shared.showMenuBarIcon {
+            showSettingsWindow()
+        }
+        
+        return true
     }
     
     private func setupStatusItem() {
@@ -66,20 +86,23 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
                         button.title = "T"
                     }
                 }
-        print("[Teximo] Status item set up")
+        
+        // Set visibility based on settings
+        statusItem.isVisible = TeximoSettings.shared.showMenuBarIcon
+        print("[Teximo] Status item set up, visible: \(statusItem.isVisible)")
 
         // Show current shortcuts (non-clickable info items)
-        let layoutShortcut = TeximoSettings.shared.layoutSwitchHotkey.displayString
+        let layoutShortcut = TeximoSettings.shared.layoutSwitchHotkey?.displayString ?? "Disabled"
         let layoutItem = NSMenuItem(title: "Switch Layout: \(layoutShortcut)", action: nil, keyEquivalent: "")
         layoutItem.isEnabled = false
         statusMenu.addItem(layoutItem)
         
-        let translitShortcut = TeximoSettings.shared.transliterationHotkey.displayString
+        let translitShortcut = TeximoSettings.shared.transliterationHotkey?.displayString ?? "Disabled"
         let translitItem = NSMenuItem(title: "Transliterate Text: \(translitShortcut)", action: nil, keyEquivalent: "")
         translitItem.isEnabled = false
         statusMenu.addItem(translitItem)
         
-        let caseShortcut = TeximoSettings.shared.caseToggleHotkey.displayString
+        let caseShortcut = TeximoSettings.shared.caseToggleHotkey?.displayString ?? "Disabled"
         let caseItem = NSMenuItem(title: "Toggle Case: \(caseShortcut)", action: nil, keyEquivalent: "")
         caseItem.isEnabled = false
         statusMenu.addItem(caseItem)
@@ -139,80 +162,92 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         let settings = TeximoSettings.shared
         
         // Check for layout switch hotkey
-        let isLayoutSwitchPressed = settings.layoutSwitchHotkey.matches(flags)
-        if !wasLayoutSwitchPressed && isLayoutSwitchPressed {
-            // Layout switch just pressed - trigger immediately
-            print("[Teximo] Layout switch hotkey detected")
-            let logPath = "/tmp/teximo_debug.log"
-            let logMessage = "[Teximo] Layout switch hotkey detected\n"
-            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            switchLayout()
+        if let layoutHotkey = settings.layoutSwitchHotkey {
+            let isLayoutSwitchPressed = layoutHotkey.matches(flags)
+            if !wasLayoutSwitchPressed && isLayoutSwitchPressed {
+                // Layout switch just pressed - trigger immediately
+                print("[Teximo] Layout switch hotkey detected")
+                let logPath = "/tmp/teximo_debug.log"
+                let logMessage = "[Teximo] Layout switch hotkey detected\n"
+                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
+                switchLayout()
+            }
+            wasLayoutSwitchPressed = isLayoutSwitchPressed
+        } else {
+            wasLayoutSwitchPressed = false
         }
-        wasLayoutSwitchPressed = isLayoutSwitchPressed
         
         // Check for transliteration hotkey - trigger on RELEASE
-        let isTransliterationPressed = settings.transliterationHotkey.matches(flags)
-        if !wasTransliterationPressed && isTransliterationPressed {
-            // Transliteration hotkey just pressed - record time
-            transliterationPressTime = Date()
-            print("[Teximo] Transliteration hotkey PRESSED")
-            let logPath = "/tmp/teximo_debug.log"
-            let logMessage = "[Teximo] Transliteration hotkey PRESSED\n"
-            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-        }
-        if wasTransliterationPressed && !isTransliterationPressed {
-            // Transliteration hotkey released
-            print("[Teximo] Transliteration hotkey RELEASED")
-            let logPath = "/tmp/teximo_debug.log"
-            let logMessage = "[Teximo] Transliteration hotkey RELEASED\n"
-            try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            
-            if let pressTime = transliterationPressTime {
-                let holdDuration = Date().timeIntervalSince(pressTime)
-                transliterationPressTime = nil
+        if let translitHotkey = settings.transliterationHotkey {
+            let isTransliterationPressed = translitHotkey.matches(flags)
+            if !wasTransliterationPressed && isTransliterationPressed {
+                // Transliteration hotkey just pressed - record time
+                transliterationPressTime = Date()
+                print("[Teximo] Transliteration hotkey PRESSED")
+                let logPath = "/tmp/teximo_debug.log"
+                let logMessage = "[Teximo] Transliteration hotkey PRESSED\n"
+                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
+            }
+            if wasTransliterationPressed && !isTransliterationPressed {
+                // Transliteration hotkey released
+                print("[Teximo] Transliteration hotkey RELEASED")
+                let logPath = "/tmp/teximo_debug.log"
+                let logMessage = "[Teximo] Transliteration hotkey RELEASED\n"
+                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
                 
-                let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                
-                print("[Teximo] Transliteration release: hold=\(holdDuration)s, sinceSelection=\(timeSinceSelection)s")
-                
-                if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                    print("[Teximo] Triggering transliteration")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                        self?.checkAndTransliterateSelectedText()
+                if let pressTime = transliterationPressTime {
+                    let holdDuration = Date().timeIntervalSince(pressTime)
+                    transliterationPressTime = nil
+                    
+                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
+                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
+                    
+                    print("[Teximo] Transliteration release: hold=\(holdDuration)s, sinceSelection=\(timeSinceSelection)s")
+                    
+                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
+                        print("[Teximo] Triggering transliteration")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                            self?.checkAndTransliterateSelectedText()
+                        }
                     }
                 }
             }
+            wasTransliterationPressed = isTransliterationPressed
+        } else {
+            wasTransliterationPressed = false
         }
-        wasTransliterationPressed = isTransliterationPressed
         
         // Check for case toggle hotkey - trigger on RELEASE
-        let isCaseTogglePressed = settings.caseToggleHotkey.matches(flags)
-        if !wasCaseTogglePressed && isCaseTogglePressed {
-            // Case toggle hotkey just pressed - record time
-            caseTogglePressTime = Date()
-            print("[Teximo] Case toggle hotkey PRESSED")
-        }
-        if wasCaseTogglePressed && !isCaseTogglePressed {
-            // Case toggle hotkey released
-            print("[Teximo] Case toggle hotkey RELEASED")
-            
-            if let pressTime = caseTogglePressTime {
-                let holdDuration = Date().timeIntervalSince(pressTime)
-                caseTogglePressTime = nil
+        if let caseHotkey = settings.caseToggleHotkey {
+            let isCaseTogglePressed = caseHotkey.matches(flags)
+            if !wasCaseTogglePressed && isCaseTogglePressed {
+                // Case toggle hotkey just pressed - record time
+                caseTogglePressTime = Date()
+                print("[Teximo] Case toggle hotkey PRESSED")
+            }
+            if wasCaseTogglePressed && !isCaseTogglePressed {
+                // Case toggle hotkey released
+                print("[Teximo] Case toggle hotkey RELEASED")
                 
-                let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                
-                if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                    print("[Teximo] Triggering case toggle")
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                        self?.toggleCaseOfSelectedText()
+                if let pressTime = caseTogglePressTime {
+                    let holdDuration = Date().timeIntervalSince(pressTime)
+                    caseTogglePressTime = nil
+                    
+                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
+                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
+                    
+                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
+                        print("[Teximo] Triggering case toggle")
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                            self?.toggleCaseOfSelectedText()
+                        }
                     }
                 }
             }
+            wasCaseTogglePressed = isCaseTogglePressed
+        } else {
+            wasCaseTogglePressed = false
         }
-        wasCaseTogglePressed = isCaseTogglePressed
         
         // Update previous flags
         previousFlags = flags
@@ -533,9 +568,36 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @objc private func openSettings() {
-        let settingsWindow = SettingsWindow()
-        settingsWindow.makeKeyAndOrderFront(nil)
+        showSettingsWindow()
+    }
+    
+    private func showSettingsWindow() {
+        if settingsWindow == nil {
+            settingsWindow = SettingsWindow()
+            settingsWindow?.onMenuBarVisibilityChanged = { [weak self] in
+                self?.updateMenuBarVisibility()
+            }
+        }
+        
+        // If menu bar icon is hidden, need to change activation policy to show window
+        if !TeximoSettings.shared.showMenuBarIcon {
+            NSApp.setActivationPolicy(.regular)
+        }
+        
+        settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        
+        // Restore accessory policy after showing window
+        if !TeximoSettings.shared.showMenuBarIcon {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                NSApp.setActivationPolicy(.accessory)
+            }
+        }
+    }
+    
+    private func updateMenuBarVisibility() {
+        statusItem.isVisible = TeximoSettings.shared.showMenuBarIcon
+        print("[Teximo] Menu bar icon visibility updated: \(statusItem.isVisible)")
     }
     
     @objc private func quit() {

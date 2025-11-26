@@ -4,6 +4,9 @@ class SettingsWindow: NSWindow {
     private var layoutSwitchButton: NSButton!
     private var transliterationButton: NSButton!
     private var caseToggleButton: NSButton!
+    private var layoutSwitchClearButton: NSButton!
+    private var transliterationClearButton: NSButton!
+    private var caseToggleClearButton: NSButton!
     private var layoutSwitchWarning: NSTextField!
     private var transliterationWarning: NSTextField!
     private var caseToggleWarning: NSTextField!
@@ -22,7 +25,7 @@ class SettingsWindow: NSWindow {
             backing: .buffered,
             defer: false
         )
-        self.title = "Settings"
+        self.title = "Teximo Settings"
         self.isReleasedWhenClosed = false
         self.center()
         setupUI()
@@ -41,6 +44,12 @@ class SettingsWindow: NSWindow {
         startupCheckbox.frame = NSRect(x: leftMargin, y: yPos, width: 300, height: 20)
         startupCheckbox.state = isStartupEnabled() ? .on : .off
         contentView.addSubview(startupCheckbox)
+        yPos -= 30
+        
+        let menuBarIconCheckbox = NSButton(checkboxWithTitle: "Show icon in menu bar", target: self, action: #selector(toggleMenuBarIcon))
+        menuBarIconCheckbox.frame = NSRect(x: leftMargin, y: yPos, width: 300, height: 20)
+        menuBarIconCheckbox.state = TeximoSettings.shared.showMenuBarIcon ? .on : .off
+        contentView.addSubview(menuBarIconCheckbox)
         yPos -= 50
         
         // KEYBOARD LAYOUTS
@@ -80,12 +89,19 @@ class SettingsWindow: NSWindow {
         let layoutLabel = NSTextField(labelWithString: "Switch Layout:")
         layoutLabel.frame = NSRect(x: leftMargin, y: yPos, width: 120, height: 20)
         contentView.addSubview(layoutLabel)
-        layoutSwitchButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 280, height: 30))
-        layoutSwitchButton.title = TeximoSettings.shared.layoutSwitchHotkey.displayString
+        layoutSwitchButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 250, height: 30))
+        layoutSwitchButton.title = TeximoSettings.shared.layoutSwitchHotkey?.displayString ?? "Record Shortcut"
         layoutSwitchButton.bezelStyle = .rounded
         layoutSwitchButton.target = self
         layoutSwitchButton.action = #selector(recordLayoutSwitch)
         contentView.addSubview(layoutSwitchButton)
+        layoutSwitchClearButton = NSButton(frame: NSRect(x: controlX + 255, y: yPos - 5, width: 25, height: 30))
+        layoutSwitchClearButton.title = "×"
+        layoutSwitchClearButton.bezelStyle = .rounded
+        layoutSwitchClearButton.target = self
+        layoutSwitchClearButton.action = #selector(clearLayoutSwitch)
+        layoutSwitchClearButton.isHidden = TeximoSettings.shared.layoutSwitchHotkey == nil
+        contentView.addSubview(layoutSwitchClearButton)
         layoutSwitchWarning = NSTextField(labelWithString: "")
         layoutSwitchWarning.frame = NSRect(x: controlX + 290, y: yPos, width: 30, height: 20)
         layoutSwitchWarning.textColor = .systemRed
@@ -96,12 +112,19 @@ class SettingsWindow: NSWindow {
         let translitLabel = NSTextField(labelWithString: "Transliterate Text:")
         translitLabel.frame = NSRect(x: leftMargin, y: yPos, width: 120, height: 20)
         contentView.addSubview(translitLabel)
-        transliterationButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 280, height: 30))
-        transliterationButton.title = TeximoSettings.shared.transliterationHotkey.displayString
+        transliterationButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 250, height: 30))
+        transliterationButton.title = TeximoSettings.shared.transliterationHotkey?.displayString ?? "Record Shortcut"
         transliterationButton.bezelStyle = .rounded
         transliterationButton.target = self
         transliterationButton.action = #selector(recordTransliteration)
         contentView.addSubview(transliterationButton)
+        transliterationClearButton = NSButton(frame: NSRect(x: controlX + 255, y: yPos - 5, width: 25, height: 30))
+        transliterationClearButton.title = "×"
+        transliterationClearButton.bezelStyle = .rounded
+        transliterationClearButton.target = self
+        transliterationClearButton.action = #selector(clearTransliteration)
+        transliterationClearButton.isHidden = TeximoSettings.shared.transliterationHotkey == nil
+        contentView.addSubview(transliterationClearButton)
         transliterationWarning = NSTextField(labelWithString: "")
         transliterationWarning.frame = NSRect(x: controlX + 290, y: yPos, width: 30, height: 20)
         transliterationWarning.textColor = .systemRed
@@ -112,25 +135,27 @@ class SettingsWindow: NSWindow {
         let caseLabel = NSTextField(labelWithString: "Toggle Case:")
         caseLabel.frame = NSRect(x: leftMargin, y: yPos, width: 120, height: 20)
         contentView.addSubview(caseLabel)
-        caseToggleButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 280, height: 30))
-        caseToggleButton.title = TeximoSettings.shared.caseToggleHotkey.displayString
+        caseToggleButton = NSButton(frame: NSRect(x: controlX, y: yPos - 5, width: 250, height: 30))
+        caseToggleButton.title = TeximoSettings.shared.caseToggleHotkey?.displayString ?? "Record Shortcut"
         caseToggleButton.bezelStyle = .rounded
         caseToggleButton.target = self
         caseToggleButton.action = #selector(recordCaseToggle)
         contentView.addSubview(caseToggleButton)
+        caseToggleClearButton = NSButton(frame: NSRect(x: controlX + 255, y: yPos - 5, width: 25, height: 30))
+        caseToggleClearButton.title = "×"
+        caseToggleClearButton.bezelStyle = .rounded
+        caseToggleClearButton.target = self
+        caseToggleClearButton.action = #selector(clearCaseToggle)
+        caseToggleClearButton.isHidden = TeximoSettings.shared.caseToggleHotkey == nil
+        contentView.addSubview(caseToggleClearButton)
         caseToggleWarning = NSTextField(labelWithString: "")
         caseToggleWarning.frame = NSRect(x: controlX + 290, y: yPos, width: 30, height: 20)
         caseToggleWarning.textColor = .systemRed
         caseToggleWarning.font = NSFont.systemFont(ofSize: 16)
         contentView.addSubview(caseToggleWarning)
-        yPos -= 35
+        yPos -= 50
         
-        let infoLabel = NSTextField(labelWithString: "Press any key (Esc to cancel)")
-        infoLabel.frame = NSRect(x: controlX, y: yPos, width: 300, height: 20)
-        infoLabel.font = NSFont.systemFont(ofSize: 11)
-        infoLabel.textColor = .secondaryLabelColor
-        contentView.addSubview(infoLabel)
-        
+        // RESET AND CLOSE BUTTONS
         let resetButton = NSButton(frame: NSRect(x: 20, y: 15, width: 140, height: 28))
         resetButton.title = "Reset to Defaults"
         resetButton.bezelStyle = .rounded
@@ -193,9 +218,9 @@ class SettingsWindow: NSWindow {
         startRecording(for: "caseToggle", button: caseToggleButton, previousValue: TeximoSettings.shared.caseToggleHotkey)
     }
     
-    private func startRecording(for type: String, button: NSButton, previousValue: HotkeyConfig) {
+    private func startRecording(for type: String, button: NSButton, previousValue: HotkeyConfig?) {
         if let activeType = recordingFor {
-            getButton(for: activeType)?.title = getPreviousConfig(for: activeType).displayString
+            getButton(for: activeType)?.title = getPreviousConfig(for: activeType)?.displayString ?? "Record Shortcut"
         }
         stopRecording()
         recordingFor = type
@@ -257,7 +282,14 @@ class SettingsWindow: NSWindow {
         default:
             break
         }
-        button.title = hotkey.displayString
+        // Update button text
+        if let button = getButton(for: recordingFor!) {
+            button.title = hotkey.displayString
+        }
+        
+        // Update clear button visibility
+        updateClearButtonVisibility()
+        
         stopRecording()
         checkConflicts()
     }
@@ -292,12 +324,12 @@ class SettingsWindow: NSWindow {
         }
     }
     
-    private func getPreviousConfig(for type: String) -> HotkeyConfig {
+    private func getPreviousConfig(for type: String) -> HotkeyConfig? {
         switch type {
         case "layout": return TeximoSettings.shared.layoutSwitchHotkey
         case "transliteration": return TeximoSettings.shared.transliterationHotkey
         case "caseToggle": return TeximoSettings.shared.caseToggleHotkey
-        default: return HotkeyConfig(modifiers: [])
+        default: return nil
         }
     }
     
@@ -360,12 +392,48 @@ class SettingsWindow: NSWindow {
     @objc private func resetToDefaults() {
         stopRecording()
         TeximoSettings.shared.resetToDefaults()
-        layoutSwitchButton.title = TeximoSettings.shared.layoutSwitchHotkey.displayString
-        transliterationButton.title = TeximoSettings.shared.transliterationHotkey.displayString
-        caseToggleButton.title = TeximoSettings.shared.caseToggleHotkey.displayString
+        layoutSwitchButton.title = TeximoSettings.shared.layoutSwitchHotkey?.displayString ?? "Record Shortcut"
+        transliterationButton.title = TeximoSettings.shared.transliterationHotkey?.displayString ?? "Record Shortcut"
+        caseToggleButton.title = TeximoSettings.shared.caseToggleHotkey?.displayString ?? "Record Shortcut"
         checkConflicts()
         populateLayoutPopup(englishLayoutPopup, language: "English")
         populateLayoutPopup(russianLayoutPopup, language: "Russian")
+    }
+    
+    // MARK: - Clear Shortcuts
+    
+    @objc private func clearLayoutSwitch() {
+        TeximoSettings.shared.layoutSwitchHotkey = nil
+        layoutSwitchButton.title = "Record Shortcut"
+        layoutSwitchClearButton.isHidden = true
+        checkConflicts()
+    }
+    
+    @objc private func clearTransliteration() {
+        TeximoSettings.shared.transliterationHotkey = nil
+        transliterationButton.title = "Record Shortcut"
+        transliterationClearButton.isHidden = true
+        checkConflicts()
+    }
+    
+    @objc private func clearCaseToggle() {
+        TeximoSettings.shared.caseToggleHotkey = nil
+        caseToggleButton.title = "Record Shortcut"
+        caseToggleClearButton.isHidden = true
+        checkConflicts()
+    }
+    
+    private func updateClearButtonVisibility() {
+        layoutSwitchClearButton.isHidden = TeximoSettings.shared.layoutSwitchHotkey == nil
+        transliterationClearButton.isHidden = TeximoSettings.shared.transliterationHotkey == nil
+        caseToggleClearButton.isHidden = TeximoSettings.shared.caseToggleHotkey == nil
+    }
+    
+    var onMenuBarVisibilityChanged: (() -> Void)?
+    
+    @objc private func toggleMenuBarIcon(_ sender: NSButton) {
+        TeximoSettings.shared.showMenuBarIcon = (sender.state == .on)
+        onMenuBarVisibilityChanged?()
     }
     
     @objc private func closeWindow() {
