@@ -1,62 +1,60 @@
-# Teximo v1.6.0 - Rectangle-Style Settings UI
+# Teximo v1.6.0
 
-Major Settings UI redesign with intuitive feature management and menu bar customization!
+A keyboard layout switcher and text transliterator for macOS that works everywhere.
 
-## 🎨 What's New
+## What It Does
 
-### Rectangle-Style Settings Interface
-- **X-buttons to clear shortcuts** - Click × next to any shortcut to disable that feature instantly
-- **No checkboxes** - Clean, minimal interface inspired by Rectangle app
-- **Smart visibility** - X-buttons auto-hide when shortcut is empty
-- **Clear placeholder** - Shows "Record Shortcut" when feature is disabled
+**Switch keyboard layouts** - Press your shortcut (default: Cmd+Shift) to switch between English and Russian layouts instantly.
 
-### Menu Bar Icon Hiding
-- **Hide icon option** - New "Show icon in menu bar" checkbox in Settings
-- **Auto-open Settings** - When icon is hidden, Settings automatically opens on app launch
-- **Works on reopen** - Run `open Teximo.app` or use Spotlight while running to access Settings
-- **Seamless UX** - No way to get locked out of Settings
+**Transliterate text** - Select text and press your shortcut (default: Option+Shift) to convert between Latin and Cyrillic characters.
 
-### UI Polish
-- Window title now shows "Teximo Settings" (was "Settings")
-- Removed static instruction text for cleaner look
-- Instructions only appear during shortcut recording
+**Toggle text case** - Select text and press your shortcut (default: Ctrl+Shift) to cycle through lowercase → UPPERCASE → Title Case.
 
-## 🔧 How It Works
+## Key Features
 
-**Disable a feature**: Click the × button next to its shortcut → Shortcut cleared → Feature disabled
+### Works Everywhere
+Transliteration works in all applications:
+- Web browsers (Chrome, Firefox, Safari)
+- Text editors (VS Code, Sublime, TextEdit)
+- Graphical editors (Figma, Sketch)
+- Chat applications (Slack, Telegram)
+- Any app with text input
 
-**Enable a feature**: Click "Record Shortcut" → Press your desired key combination → Feature enabled
+### Custom Keyboard Layouts
+Supports any keyboard layout including:
+- Standard layouts (US, Russian, etc.)
+- Typography layout
+- Custom layouts
+- Multiple variants
 
-**Features controlled by shortcuts**:
-- Empty/cleared shortcut = Feature disabled
-- Set shortcut = Feature enabled  
-- Menu displays "Disabled" for cleared features
+### Customizable
+- Set your own shortcuts for any function
+- Disable any feature you don't need (just clear its shortcut)
+- Hide from menu bar and forget - it runs silently in the background
+- No dock icon, no interruptions
 
-## 📦 Installation
+### macOS Tahoe Support
+Updated for full compatibility with the latest macOS Tahoe release.
+
+## Installation
 
 ### Direct Download
 1. Download `Teximo-1.6.0.dmg`
 2. Open DMG and drag Teximo to Applications
-3. Launch Teximo from Applications
+3. Launch and grant accessibility permissions
 
 ### Homebrew
 ```bash
 brew install dmrkv/teximo/teximo
 ```
 
-## 🔐 Verification
+## Requirements
+- macOS 13.0+ (Ventura or later)
+- Accessibility permissions (requested on first launch)
+
+## Verification
 
 SHA256: `0e1568b798b74fb35274a50dd3f20bc75550a66f9b480103725715eb3ff2e6db`
-
-## 🐛 Bug Fixes & Improvements
-- Fixed Settings window activation when menu bar icon is hidden
-- Improved accessibility permission flow
-- Better window management for accessory apps
-
-## 📝 Technical Details
-- macOS 13.0+ (Ventura or later)
-- Universal Binary (Intel/Apple Silicon)
-- Size: 2.9 MB
 
 ---
 
