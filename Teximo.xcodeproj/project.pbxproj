@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		0022578FDB9C8FB2BD05974E /* IconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */; };
-
 		2A51C6406D362113DABE2CF1 /* TextActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B44F63991DF2D38B5A59E2 /* TextActions.swift */; };
+		30FE739D63B0C029125D6EE7 /* NotchDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C33241A46F5460DC6F7E18B /* NotchDetector.swift */; };
+		359886F2DFBC0884202DBAB6 /* TeximoSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE561A6FB141A0EECA4C4597 /* TeximoSettings.swift */; };
 		4715C75B0747A25FE3A20435 /* CaseToggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BE0FC2957C96F6E0DC7A0A3 /* CaseToggle.swift */; };
 		4C8F88D8AC11EEE74D7525A5 /* Transliterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */; };
-
-
+		5C9BF4D7E9A6797332D0C7BC /* LayoutEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7ABB5C6DD5EC1A722387F84 /* LayoutEnumerator.swift */; };
 		6430FD34676C0716232BF99F /* AppIcon.iconset in Resources */ = {isa = PBXBuildFile; fileRef = E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */; };
 		6BB05F09A4141D8E33E51504 /* SimpleLayoutSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B974AFB475F652B5B938348 /* SimpleLayoutSwitcher.swift */; };
 		735E7838B6BEEDA0B7EF3807 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F3559EAB327E14B195E97C /* main.swift */; };
@@ -21,18 +21,18 @@
 		82511E26FB4A956AE299C45B /* AppIconGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606BCA7E6DDAD523FD3ED921 /* AppIconGenerator.swift */; };
 		8D79ACE5DE14C4572E7DE940 /* AccessibilityHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98EFA333F86EA62BB228E9B3 /* AccessibilityHelper.swift */; };
 		9733938794B5AB766A6747EF /* WorkingHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB974F0117D2989A1F44476 /* WorkingHotkeyManager.swift */; };
+		B6BD3B3D56479FA54FD38B68 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07088AA567FFF8828CD0007D /* SettingsWindow.swift */; };
+		B7B00E98D3C23630FDF14717 /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C8D2685726CBC257BBFA05 /* AccessibilityPermissionWindow.swift */; };
 		BCAB34B93D8BDF4B3944BF8B /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = E518EA0FC234F6411EED1F4B /* AppIcon.png */; };
 		D7D0036A43B5A151D61470D9 /* SimpleHotkeyDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */; };
 		EDC581511B8EC6D69ADB87FF /* SimpleAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A5EC2C5FF2CEF75110B7A /* SimpleAppDelegate.swift */; };
 		F9AE8FC86F574ADB9141DC91 /* SimpleHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */; };
-		BF2A349CB6AA45358B51427D /* AccessibilityPermissionWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHotkeyDetector.swift; sourceTree = "<group>"; };
-
-		960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
-
+		07088AA567FFF8828CD0007D /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		0C33241A46F5460DC6F7E18B /* NotchDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchDetector.swift; sourceTree = "<group>"; };
 		37B44F63991DF2D38B5A59E2 /* TextActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextActions.swift; sourceTree = "<group>"; };
 		5BE0FC2957C96F6E0DC7A0A3 /* CaseToggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaseToggle.swift; sourceTree = "<group>"; };
 		606BCA7E6DDAD523FD3ED921 /* AppIconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconGenerator.swift; sourceTree = "<group>"; };
@@ -44,10 +44,12 @@
 		A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHotkeyManager.swift; sourceTree = "<group>"; };
 		AA12020CAAF47A304C276686 /* Teximo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teximo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B393DBE54001F2FD04F23F07 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
-
+		C7ABB5C6DD5EC1A722387F84 /* LayoutEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutEnumerator.swift; sourceTree = "<group>"; };
 		CF7791C4CD9B3B9406E439A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		DE561A6FB141A0EECA4C4597 /* TeximoSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeximoSettings.swift; sourceTree = "<group>"; };
 		E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */ = {isa = PBXFileReference; lastKnownFileType = folder.iconset; path = AppIcon.iconset; sourceTree = "<group>"; };
 		E518EA0FC234F6411EED1F4B /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AppIcon.png; sourceTree = "<group>"; };
+		E6C8D2685726CBC257BBFA05 /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
 		F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGenerator.swift; sourceTree = "<group>"; };
 		F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transliterator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -65,8 +67,7 @@
 			isa = PBXGroup;
 			children = (
 				98EFA333F86EA62BB228E9B3 /* AccessibilityHelper.swift */,
-				960FB92DFC3C409F9CF65765 /* AccessibilityPermissionWindow.swift */,
-
+				E6C8D2685726CBC257BBFA05 /* AccessibilityPermissionWindow.swift */,
 				E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */,
 				E518EA0FC234F6411EED1F4B /* AppIcon.png */,
 				606BCA7E6DDAD523FD3ED921 /* AppIconGenerator.swift */,
@@ -74,14 +75,16 @@
 				B393DBE54001F2FD04F23F07 /* HotkeyManager.swift */,
 				F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */,
 				CF7791C4CD9B3B9406E439A5 /* Info.plist */,
-
+				C7ABB5C6DD5EC1A722387F84 /* LayoutEnumerator.swift */,
 				83F3559EAB327E14B195E97C /* main.swift */,
+				0C33241A46F5460DC6F7E18B /* NotchDetector.swift */,
+				07088AA567FFF8828CD0007D /* SettingsWindow.swift */,
 				8D0A5EC2C5FF2CEF75110B7A /* SimpleAppDelegate.swift */,
 				064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */,
 				A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */,
 				9B974AFB475F652B5B938348 /* SimpleLayoutSwitcher.swift */,
+				DE561A6FB141A0EECA4C4597 /* TeximoSettings.swift */,
 				37B44F63991DF2D38B5A59E2 /* TextActions.swift */,
-
 				F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */,
 				9CB974F0117D2989A1F44476 /* WorkingHotkeyManager.swift */,
 			);
@@ -169,19 +172,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D79ACE5DE14C4572E7DE940 /* AccessibilityHelper.swift in Sources */,
-				BF2A349CB6AA45358B51427D /* AccessibilityPermissionWindow.swift in Sources */,
-
+				B7B00E98D3C23630FDF14717 /* AccessibilityPermissionWindow.swift in Sources */,
 				82511E26FB4A956AE299C45B /* AppIconGenerator.swift in Sources */,
 				4715C75B0747A25FE3A20435 /* CaseToggle.swift in Sources */,
 				781BD5BF9F6D9168364A8C20 /* HotkeyManager.swift in Sources */,
 				0022578FDB9C8FB2BD05974E /* IconGenerator.swift in Sources */,
-
+				5C9BF4D7E9A6797332D0C7BC /* LayoutEnumerator.swift in Sources */,
+				30FE739D63B0C029125D6EE7 /* NotchDetector.swift in Sources */,
+				B6BD3B3D56479FA54FD38B68 /* SettingsWindow.swift in Sources */,
 				EDC581511B8EC6D69ADB87FF /* SimpleAppDelegate.swift in Sources */,
 				D7D0036A43B5A151D61470D9 /* SimpleHotkeyDetector.swift in Sources */,
 				F9AE8FC86F574ADB9141DC91 /* SimpleHotkeyManager.swift in Sources */,
 				6BB05F09A4141D8E33E51504 /* SimpleLayoutSwitcher.swift in Sources */,
+				359886F2DFBC0884202DBAB6 /* TeximoSettings.swift in Sources */,
 				2A51C6406D362113DABE2CF1 /* TextActions.swift in Sources */,
-
 				4C8F88D8AC11EEE74D7525A5 /* Transliterator.swift in Sources */,
 				9733938794B5AB766A6747EF /* WorkingHotkeyManager.swift in Sources */,
 				735E7838B6BEEDA0B7EF3807 /* main.swift in Sources */,
@@ -195,14 +199,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Teximo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				INFOPLIST_FILE = Sources/Teximo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.7.2;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.teximo.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -275,14 +282,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Teximo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				INFOPLIST_FILE = Sources/Teximo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MARKETING_VERSION = 1.7.2;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.teximo.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;

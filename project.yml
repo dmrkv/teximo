@@ -12,9 +12,13 @@ targets:
       - path: Sources/Teximo/SimpleAppDelegate.swift
       - path: Sources/Teximo/IconGenerator.swift
       - path: Sources/Teximo/AppIconGenerator.swift
+    entitlements:
+      path: Teximo.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.teximo.app
+        MARKETING_VERSION: 1.7.2
+        CURRENT_PROJECT_VERSION: 2
         CODE_SIGN_STYLE: Automatic
         SWIFT_VERSION: 5.0
         INFOPLIST_FILE: Sources/Teximo/Info.plist

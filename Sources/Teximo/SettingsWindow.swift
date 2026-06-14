@@ -1,4 +1,5 @@
 import Cocoa
+import ServiceManagement
 
 class SettingsWindow: NSWindow {
     private var layoutSwitchButton: NSButton!
@@ -357,36 +358,34 @@ class SettingsWindow: NSWindow {
     // MARK: - Startup
     
     private func isStartupEnabled() -> Bool {
-        let script = """
-        tell application "System Events"
-            get the name of every login item
-        end tell
-        """
-        var error: NSDictionary?
-        if let applescript = NSAppleScript(source: script), let result = applescript.executeAndReturnError(&error).stringValue {
-            return result.contains("Teximo")
-        }
-        return false
+        SMAppService.mainApp.status == .enabled
     }
     
     @objc private func toggleStartup(_ sender: NSButton) {
-        let appPath = Bundle.main.bundlePath
-        let appName = "Teximo"
-        if sender.state == .on {
-            let script = """
-            tell application "System Events"
-                make login item at end with properties {path:"\(appPath)", hidden:false, name:"\(appName)"}
-            end tell
-            """
-            NSAppleScript(source: script)?.executeAndReturnError(nil)
-        } else {
-            let script = """
-            tell application "System Events"
-                delete login item "\(appName)"
-            end tell
-            """
-            NSAppleScript(source: script)?.executeAndReturnError(nil)
+        let enabled = sender.state == .on
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+            } else {
+                try SMAppService.mainApp.unregister()
+            }
+            removeLegacyLoginItemIfNeeded()
+            UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
+        } catch {
+            print("[Teximo] Failed to toggle launch at login: \(error)")
+            sender.state = enabled ? .off : .on
         }
+    }
+    
+    private func removeLegacyLoginItemIfNeeded() {
+        let script = """
+        tell application "System Events"
+            if exists login item "Teximo" then
+                delete login item "Teximo"
+            end if
+        end tell
+        """
+        NSAppleScript(source: script)?.executeAndReturnError(nil)
     }
     
     @objc private func resetToDefaults() {

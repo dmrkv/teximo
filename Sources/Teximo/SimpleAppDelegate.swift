@@ -52,6 +52,17 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         
+        // Show notch warning if needed (on first launch on notched Macs)
+        if NotchDetector.shouldShowNotchWarning() {
+            // Delay to ensure app is fully launched
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                NotchDetector.showNotchWarning()
+                NotchDetector.markWarningShown()
+            }
+        }
+        
+        migrateLaunchAtLoginIfNeeded()
+        
         print("[Teximo] SimpleAppDelegate applicationDidFinishLaunching - END")
     }
     
@@ -59,10 +70,8 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         print("[Teximo] App reopened, hasVisibleWindows: \(flag)")
         
-        // If menu bar icon is hidden, show Settings window
-        if !TeximoSettings.shared.showMenuBarIcon {
-            showSettingsWindow()
-        }
+        // Always show Settings window when app is re-launched
+        showSettingsWindow()
         
         return true
     }
@@ -111,8 +120,8 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
 
         // Get app version
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
-        let buildNumber = Date().timeIntervalSince1970.truncatingRemainder(dividingBy: 86400) / 100
-        let versionItem = NSMenuItem(title: String(format: "Teximo v%@.%d", version, Int(buildNumber)), action: nil, keyEquivalent: "")
+        let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+        let versionItem = NSMenuItem(title: "Teximo v\(version).\(buildNumber)", action: nil, keyEquivalent: "")
         versionItem.isEnabled = false
         statusMenu.addItem(versionItem)
         
@@ -608,73 +617,49 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         let isEnabled = isStartupEnabled()
         setStartupEnabled(!isEnabled)
         
-        // Update the menu item state
         if let startupItem = statusMenu.items.first(where: { $0.title.contains("Start Teximo when macOS starts") }) {
-            startupItem.state = !isEnabled ? .on : .off
+            startupItem.state = isStartupEnabled() ? .on : .off
         }
     }
     
     private func isStartupEnabled() -> Bool {
-        // Check if the app is in Login Items using AppleScript
-        let script = """
-        tell application "System Events"
-            get the name of every login item
-        end tell
-        """
-        
-        let appleScript = NSAppleScript(source: script)
-        let result = appleScript?.executeAndReturnError(nil)
-        
-        if let loginItems = result?.stringValue {
-            return loginItems.contains("Teximo")
-        }
-        
-        return UserDefaults.standard.bool(forKey: "TeximoStartupEnabled")
+        SMAppService.mainApp.status == .enabled
     }
     
     private func setStartupEnabled(_ enabled: Bool) {
-        let appPath = Bundle.main.bundlePath
-        
-        if enabled {
-            // Add to Login Items using AppleScript
-            let script = """
-            tell application "System Events"
-                make login item at end with properties {path:"\(appPath)", hidden:false}
-            end tell
-            """
-            
-            let appleScript = NSAppleScript(source: script)
-            let result = appleScript?.executeAndReturnError(nil)
-            
-            if result != nil {
-                print("[Teximo] Successfully added to Login Items - app will start automatically")
+        do {
+            if enabled {
+                try SMAppService.mainApp.register()
+                removeLegacyLoginItemIfNeeded()
+                print("[Teximo] Successfully registered launch at login")
             } else {
-                print("[Teximo] Failed to add to Login Items")
-                print("[Teximo] You may need to manually add Teximo to Login Items:")
-                print("[Teximo] 1. Go to System Settings > Users & Groups > Login Items")
-                print("[Teximo] 2. Click the '+' button")
-                print("[Teximo] 3. Select Teximo.app from Applications folder")
+                try SMAppService.mainApp.unregister()
+                removeLegacyLoginItemIfNeeded()
+                print("[Teximo] Successfully unregistered launch at login")
             }
-        } else {
-            // Remove from Login Items using AppleScript
-            let script = """
-            tell application "System Events"
-                delete login item "Teximo"
-            end tell
-            """
-            
-            let appleScript = NSAppleScript(source: script)
-            let result = appleScript?.executeAndReturnError(nil)
-            
-            if result != nil {
-                print("[Teximo] Successfully removed from Login Items - app will not start automatically")
-            } else {
-                print("[Teximo] Failed to remove from Login Items")
-            }
+            UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
+        } catch {
+            print("[Teximo] Failed to \(enabled ? "enable" : "disable") launch at login: \(error)")
         }
-        
-        // Store the preference for UI state
-        UserDefaults.standard.set(enabled, forKey: "TeximoStartupEnabled")
+    }
+    
+    /// Migrates users who enabled startup via the legacy AppleScript login-item API.
+    private func migrateLaunchAtLoginIfNeeded() {
+        let preferred = UserDefaults.standard.bool(forKey: "TeximoStartupEnabled")
+        guard preferred, SMAppService.mainApp.status != .enabled else { return }
+        setStartupEnabled(true)
+    }
+    
+    /// Removes duplicate launch entries created by the pre-1.x AppleScript approach.
+    private func removeLegacyLoginItemIfNeeded() {
+        let script = """
+        tell application "System Events"
+            if exists login item "Teximo" then
+                delete login item "Teximo"
+            end if
+        end tell
+        """
+        NSAppleScript(source: script)?.executeAndReturnError(nil)
     }
     
     private func showAccessibilityPermissionWindow() {

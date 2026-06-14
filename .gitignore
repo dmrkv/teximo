@@ -39,6 +39,9 @@ DerivedData/
 # Logs
 *.log
 
+# Local release secrets (copy from .env.example)
+.env
+
 # macOS
 .DS_Store
 .AppleDouble
