@@ -60,19 +60,8 @@ codesign --force --verify --verbose --timestamp --options runtime \
 echo "Signed $APP_NAME.app"
 
 echo "Creating DMG..."
-
 DMG_NAME="${APP_NAME}-${VERSION}.dmg"
-if [ -f "$DMG_NAME" ]; then
-    rm "$DMG_NAME"
-fi
-
-TMP_DIR=$(mktemp -d)
-ditto "$APP_PATH" "$TMP_DIR/$APP_NAME.app"
-ln -s /Applications "$TMP_DIR/Applications"
-hdiutil create -volname "$APP_NAME" -srcfolder "$TMP_DIR" -ov -format UDZO "$DMG_NAME" -quiet
-rm -rf "$TMP_DIR"
-
-echo "DMG Created: $DMG_NAME"
+"$SCRIPT_DIR/scripts/create_beautiful_dmg.sh" "$APP_PATH" "$DMG_NAME"
 
 echo "Signing DMG..."
 codesign --force --verify --verbose --timestamp \
