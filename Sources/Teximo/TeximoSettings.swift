@@ -13,24 +13,9 @@ struct HotkeyConfig: Codable, Equatable {
         self.enabled = enabled
     }
     
-    // Check if NSEvent.ModifierFlags matches this config
-    func matches(_ flags: NSEvent.ModifierFlags) -> Bool {
+    func matches(modifiers eventModifiers: Set<ModifierKey>, keyCode eventKeyCode: UInt16?) -> Bool {
         guard enabled else { return false }
-        
-        let hasCommand = flags.contains(.command)
-        let hasShift = flags.contains(.shift)
-        let hasOption = flags.contains(.option)
-        let hasControl = flags.contains(.control)
-        
-        let wantCommand = modifiers.contains(.command)
-        let wantShift = modifiers.contains(.shift)
-        let wantOption = modifiers.contains(.option)
-        let wantControl = modifiers.contains(.control)
-        
-        return hasCommand == wantCommand &&
-               hasShift == wantShift &&
-               hasOption == wantOption &&
-               hasControl == wantControl
+        return modifiers == eventModifiers && keyCode == eventKeyCode
     }
     
     var displayString: String {

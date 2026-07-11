@@ -4,16 +4,9 @@ import ServiceManagement
 class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let statusMenu = NSMenu()
-    private var eventMonitor: Any?
-    private var transliterationTimer: Timer?
-    private var isSelectingText = false
+    private let hotkeyManager = HotkeyManager()
+    private var selectionEventMonitor: Any?
     private var permissionWindow: AccessibilityPermissionWindow?
-    
-    // Track modifier state to detect releases
-    private var previousFlags: NSEvent.ModifierFlags = []
-    private var wasLayoutSwitchPressed = false
-    private var wasTransliterationPressed = false
-    private var wasCaseTogglePressed = false
     
     // Track press times for release-based triggers
     private var transliterationPressTime: Date?
@@ -64,6 +57,14 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         migrateLaunchAtLoginIfNeeded()
         
         print("[Teximo] SimpleAppDelegate applicationDidFinishLaunching - END")
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        hotkeyManager.stop()
+        if let selectionEventMonitor {
+            NSEvent.removeMonitor(selectionEventMonitor)
+        }
+        selectionEventMonitor = nil
     }
     
     // Handle app reopen (when user clicks app icon or runs 'open' while already running)
@@ -142,124 +143,135 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     
     private func setupHotkeyDetection() {
         print("[Teximo] Setting up hotkey detection")
-        
-        // Use NSEvent monitors for global hotkey detection
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { [weak self] event in
-            if event.type == .flagsChanged {
-                self?.handleFlagsChanged(event)
-            } else if event.type == .keyDown {
+
+        let installed = hotkeyManager.start(
+            configurations: { [weak self] in
+                self?.currentHotkeyConfigurations() ?? [:]
+            },
+            onInvocation: { [weak self] invocation in
+                self?.handleHotkeyInvocation(invocation)
+            }
+        )
+
+        if !installed {
+            print("[Teximo] Global hotkeys unavailable because the event tap could not be installed")
+        }
+
+        // This monitor only tracks selection activity. Hotkey matching and event
+        // suppression are owned exclusively by HotkeyManager.
+        selectionEventMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.keyDown, .leftMouseDragged, .rightMouseDragged]
+        ) { [weak self] event in
+            if event.type == .keyDown {
                 self?.handleKeyDown(event)
+            } else {
+                self?.lastSelectionChangeTime = Date()
             }
         }
-        
-        // Also monitor mouse events to detect selection activity
-        NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged, .rightMouseDragged]) { [weak self] _ in
-            self?.lastSelectionChangeTime = Date()
-        }
-        
-        if eventMonitor != nil {
-            print("[Teximo] Global event monitor created")
-        } else {
-            print("[Teximo] Failed to create global event monitor")
+
+        if selectionEventMonitor == nil {
+            print("[Teximo] Failed to create selection activity monitor")
         }
     }
-    
-    private func handleFlagsChanged(_ event: NSEvent) {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        
-        // Get current hotkey configurations
+
+    private func currentHotkeyConfigurations() -> [HotkeyAction: HotkeyConfig] {
         let settings = TeximoSettings.shared
-        
-        // Check for layout switch hotkey
-        if let layoutHotkey = settings.layoutSwitchHotkey {
-            let isLayoutSwitchPressed = layoutHotkey.matches(flags)
-            if !wasLayoutSwitchPressed && isLayoutSwitchPressed {
-                // Layout switch just pressed - trigger immediately
-                print("[Teximo] Layout switch hotkey detected")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Layout switch hotkey detected\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-                switchLayout()
-            }
-            wasLayoutSwitchPressed = isLayoutSwitchPressed
-        } else {
-            wasLayoutSwitchPressed = false
+        var configurations: [HotkeyAction: HotkeyConfig] = [:]
+        if let config = settings.layoutSwitchHotkey {
+            configurations[.switchLayout] = config
         }
-        
-        // Check for transliteration hotkey - trigger on RELEASE
-        if let translitHotkey = settings.transliterationHotkey {
-            let isTransliterationPressed = translitHotkey.matches(flags)
-            if !wasTransliterationPressed && isTransliterationPressed {
-                // Transliteration hotkey just pressed - record time
-                transliterationPressTime = Date()
-                print("[Teximo] Transliteration hotkey PRESSED")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Transliteration hotkey PRESSED\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            }
-            if wasTransliterationPressed && !isTransliterationPressed {
-                // Transliteration hotkey released
-                print("[Teximo] Transliteration hotkey RELEASED")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Transliteration hotkey RELEASED\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-                
-                if let pressTime = transliterationPressTime {
-                    let holdDuration = Date().timeIntervalSince(pressTime)
-                    transliterationPressTime = nil
-                    
-                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                    
-                    print("[Teximo] Transliteration release: hold=\(holdDuration)s, sinceSelection=\(timeSinceSelection)s")
-                    
-                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                        print("[Teximo] Triggering transliteration")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            self?.checkAndTransliterateSelectedText()
-                        }
-                    }
-                }
-            }
-            wasTransliterationPressed = isTransliterationPressed
-        } else {
-            wasTransliterationPressed = false
+        if let config = settings.transliterationHotkey {
+            configurations[.transliterateText] = config
         }
-        
-        // Check for case toggle hotkey - trigger on RELEASE
-        if let caseHotkey = settings.caseToggleHotkey {
-            let isCaseTogglePressed = caseHotkey.matches(flags)
-            if !wasCaseTogglePressed && isCaseTogglePressed {
-                // Case toggle hotkey just pressed - record time
-                caseTogglePressTime = Date()
-                print("[Teximo] Case toggle hotkey PRESSED")
-            }
-            if wasCaseTogglePressed && !isCaseTogglePressed {
-                // Case toggle hotkey released
-                print("[Teximo] Case toggle hotkey RELEASED")
-                
-                if let pressTime = caseTogglePressTime {
-                    let holdDuration = Date().timeIntervalSince(pressTime)
-                    caseTogglePressTime = nil
-                    
-                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                    
-                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                        print("[Teximo] Triggering case toggle")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            self?.toggleCaseOfSelectedText()
-                        }
-                    }
-                }
-            }
-            wasCaseTogglePressed = isCaseTogglePressed
-        } else {
-            wasCaseTogglePressed = false
+        if let config = settings.caseToggleHotkey {
+            configurations[.toggleCase] = config
         }
-        
-        // Update previous flags
-        previousFlags = flags
+        return configurations
+    }
+
+    private func handleHotkeyInvocation(_ invocation: HotkeyInvocation) {
+        if invocation.source == .keyed {
+            guard invocation.phase == .pressed else { return }
+            triggerKeyedAction(invocation.action)
+            return
+        }
+
+        switch (invocation.action, invocation.phase) {
+        case (.switchLayout, .pressed):
+            triggerLayoutSwitch()
+        case (.switchLayout, .released):
+            break
+        case (.transliterateText, .pressed):
+            transliterationPressTime = Date()
+            print("[Teximo] Transliteration hotkey PRESSED")
+        case (.transliterateText, .released):
+            handleTransliterationRelease()
+        case (.toggleCase, .pressed):
+            caseTogglePressTime = Date()
+            print("[Teximo] Case toggle hotkey PRESSED")
+        case (.toggleCase, .released):
+            handleCaseToggleRelease()
+        }
+    }
+
+    private func triggerKeyedAction(_ action: HotkeyAction) {
+        switch action {
+        case .switchLayout:
+            triggerLayoutSwitch()
+        case .transliterateText:
+            scheduleTransliterationIfSelectionStable()
+        case .toggleCase:
+            scheduleCaseToggleIfSelectionStable()
+        }
+    }
+
+    private func triggerLayoutSwitch() {
+        print("[Teximo] Layout switch hotkey detected")
+        switchLayout()
+    }
+
+    private func handleTransliterationRelease() {
+        print("[Teximo] Transliteration hotkey RELEASED")
+        guard let pressTime = transliterationPressTime else { return }
+        transliterationPressTime = nil
+
+        let holdDuration = Date().timeIntervalSince(pressTime)
+        print("[Teximo] Transliteration release: hold=\(holdDuration)s")
+        if holdDuration < 0.5 {
+            scheduleTransliterationIfSelectionStable()
+        }
+    }
+
+    private func handleCaseToggleRelease() {
+        print("[Teximo] Case toggle hotkey RELEASED")
+        guard let pressTime = caseTogglePressTime else { return }
+        caseTogglePressTime = nil
+
+        if Date().timeIntervalSince(pressTime) < 0.5 {
+            scheduleCaseToggleIfSelectionStable()
+        }
+    }
+
+    private func scheduleTransliterationIfSelectionStable() {
+        let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
+        let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
+        guard timeSinceSelection > 0.3, timeSinceArrow > 0.3 else { return }
+
+        print("[Teximo] Triggering transliteration")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.checkAndTransliterateSelectedText()
+        }
+    }
+
+    private func scheduleCaseToggleIfSelectionStable() {
+        let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
+        let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
+        guard timeSinceSelection > 0.3, timeSinceArrow > 0.3 else { return }
+
+        print("[Teximo] Triggering case toggle")
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.toggleCaseOfSelectedText()
+        }
     }
     
     private func handleKeyDown(_ event: NSEvent) {
@@ -585,6 +597,9 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
             settingsWindow = SettingsWindow()
             settingsWindow?.onMenuBarVisibilityChanged = { [weak self] in
                 self?.updateMenuBarVisibility()
+            }
+            settingsWindow?.onShortcutRecordingChanged = { [weak self] isRecording in
+                self?.hotkeyManager.isSuspended = isRecording
             }
         }
         

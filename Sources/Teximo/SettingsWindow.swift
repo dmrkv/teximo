@@ -18,6 +18,9 @@ class SettingsWindow: NSWindow {
     private var keyMonitor: Any?
     private var flagsMonitor: Any?
     private var lastModifiers: Set<ModifierKey> = []
+
+    var onShortcutRecordingChanged: ((Bool) -> Void)?
+    var onMenuBarVisibilityChanged: (() -> Void)?
     
     init() {
         super.init(
@@ -227,6 +230,7 @@ class SettingsWindow: NSWindow {
         recordingFor = type
         previousHotkey = previousValue
         lastModifiers = []
+        onShortcutRecordingChanged?(true)
         button.title = "Press keys... (Esc to cancel)"
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             self?.handleKeyPress(event, for: type, button: button)
@@ -303,6 +307,7 @@ class SettingsWindow: NSWindow {
     }
     
     private func stopRecording() {
+        let wasRecording = recordingFor != nil
         if let monitor = keyMonitor {
             NSEvent.removeMonitor(monitor)
             keyMonitor = nil
@@ -314,6 +319,9 @@ class SettingsWindow: NSWindow {
         recordingFor = nil
         previousHotkey = nil
         lastModifiers = []
+        if wasRecording {
+            onShortcutRecordingChanged?(false)
+        }
     }
     
     private func getButton(for type: String) -> NSButton? {
@@ -428,15 +436,17 @@ class SettingsWindow: NSWindow {
         caseToggleClearButton.isHidden = TeximoSettings.shared.caseToggleHotkey == nil
     }
     
-    var onMenuBarVisibilityChanged: (() -> Void)?
-    
     @objc private func toggleMenuBarIcon(_ sender: NSButton) {
         TeximoSettings.shared.showMenuBarIcon = (sender.state == .on)
         onMenuBarVisibilityChanged?()
     }
     
     @objc private func closeWindow() {
-        stopRecording()
         self.close()
+    }
+
+    override func close() {
+        stopRecording()
+        super.close()
     }
 }
