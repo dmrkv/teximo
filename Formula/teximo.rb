@@ -1,9 +1,9 @@
 class Teximo < Formula
-  desc "A seamless macOS menu bar app for keyboard layout switching and text transliteration"
+  desc "macOS keyboard layout switching, transliteration, and native translation"
   homepage "https://github.com/dmrkv/teximo"
-  url "https://github.com/dmrkv/teximo/releases/download/v1.7.2/Teximo-1.7.2.dmg"
-  sha256 "a7d36bfe9f877c5c16720a9a81623b1b3930679d82bcdab7136dde5b11606e09"
-  version "1.7.2"
+  url "https://github.com/dmrkv/teximo/releases/download/v1.8.0/Teximo-1.8.0.dmg"
+  sha256 "dfb50487df3f28e8ed891d333129163e4097c1217d56816d65d65a7008bc46e2"
+  version "1.8.0"
   license "MIT"
 
 
@@ -29,27 +29,17 @@ class Teximo < Formula
 
   def caveats
     <<~EOS
-      🚨 IMPORTANT - Security Warning Fix:
-      
-      When you first try to launch Teximo, macOS will show a security warning:
-      > "Teximo" cannot be opened because the developer cannot be verified.
-      
-      To fix this, you MUST:
-      - Right-click on Teximo.app in Applications folder
-      - Select "Open" from the context menu
-      - Click "Open" in the security dialog
-      
-      This is a one-time step - after this, Teximo will launch normally!
-      
-      🎯 Hotkeys:
-      - ⌘+Shift: Switch keyboard layouts
-      - Ctrl+Shift: Transliterate selected text
-      
-      Teximo has been installed to:
-        #{prefix}/Teximo.app
-      
-      You can also run it from the command line:
-        teximo
+      Launch Teximo.app from #{prefix}/Teximo.app and allow Accessibility access
+      in System Settings → Privacy & Security → Accessibility.
+
+      Default shortcuts:
+        ⌘⇧   Switch keyboard layouts
+        ⌥⇧   Transliterate selected text
+        ⌃⇧   Change text case
+        ⌃⌥T  Translate selected text
+
+      Configure shortcuts, keyboard layouts, and translation languages in Settings.
+      Native translation requires macOS 15 or later.
     EOS
   end
 
