@@ -1,36 +1,30 @@
 class Teximo < Formula
   desc "macOS keyboard layout switching, transliteration, and native translation"
   homepage "https://github.com/dmrkv/teximo"
-  url "https://github.com/dmrkv/teximo/releases/download/v1.8.0/Teximo-1.8.0.dmg"
-  sha256 "dfb50487df3f28e8ed891d333129163e4097c1217d56816d65d65a7008bc46e2"
+  url "https://github.com/dmrkv/teximo/releases/download/v1.8.0/Teximo-1.8.0.zip"
+  sha256 "07bfddbda2bd634c044cb0eb66850e427e997d5b5da73568ba9bfd2a79a6172c"
   version "1.8.0"
   license "MIT"
 
+  # Preserve the notarized app bundle during Homebrew's cleanup.
+  skip_clean "Teximo.app"
 
   def install
-    # Mount the DMG
-    system "hdiutil", "attach", "-nobrowse", "-quiet", cached_download
-    
-    # Find the actual volume name (macOS may rename it to "Teximo 1", "Teximo 2", etc.)
-    volume_name = Dir.glob("/Volumes/Teximo*").first
-    if volume_name.nil?
-      odie "Could not find mounted Teximo volume"
-    end
-    
-    # Copy the app to the Applications folder
-    system "cp", "-R", "#{volume_name}/Teximo.app", "#{prefix}/"
-    
-    # Create a symlink in /usr/local/bin for easy access
-    bin.install_symlink "#{prefix}/Teximo.app/Contents/MacOS/Teximo" => "teximo"
-    
-    # Unmount the DMG
-    system "hdiutil", "detach", "-quiet", volume_name
+    prefix.install "Teximo.app"
+    (bin/"teximo").write <<~SH
+      #!/bin/bash
+      exec "#{prefix}/Teximo.app/Contents/MacOS/Teximo" "$@"
+    SH
+    (bin/"teximo").chmod 0755
   end
 
   def caveats
     <<~EOS
-      Launch Teximo.app from #{prefix}/Teximo.app and allow Accessibility access
-      in System Settings → Privacy & Security → Accessibility.
+      Launch the Homebrew-managed app with:
+        open "#{opt_prefix}/Teximo.app"
+
+      Allow Accessibility access in System Settings → Privacy & Security.
+      Quit any older manual or development copy before launching this one.
 
       Default shortcuts:
         ⌘⇧   Switch keyboard layouts
@@ -44,7 +38,6 @@ class Teximo < Formula
   end
 
   test do
-    # Test that the app can be launched
-    system "#{bin}/teximo", "--version"
+    assert_equal version.to_s, shell_output("#{bin}/teximo --version").strip
   end
 end

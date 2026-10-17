@@ -14,11 +14,11 @@ Before creating the next release:
 - While translating, type or change fields; the original input must remain untouched and **Copy Translation** should be offered.
 - Check a non-text clipboard item survives replacement, and a new clipboard copy is preserved.
 - Verify the sidebar and all four settings pages in light and dark mode.
-- Sign and notarize with Developer ID, then update the Homebrew tap URL/version/checksum to the exact published DMG. Local development bundles are not distribution artifacts.
+- Sign and notarize with Developer ID, then update the Homebrew tap URL/version/checksum to the exact published ZIP. Local development bundles are not distribution artifacts.
 
 ## Universal build for v1.8.0
 
-Run `bash scripts/build_universal_app.sh` with a full Xcode installation selected. It builds both architectures into `build/release-1.8.0/Teximo.app`, preserving development bundles. Sign the app with Developer ID and a secure timestamp, notarize and staple the app, then create, sign, notarize and staple the distribution DMG. Publish only after Gatekeeper validation succeeds. Update the formula in this repository and the Homebrew tap with the final stapled DMG's SHA256. Release notes are in `RELEASE_NOTES_1.8.0.md`.
+Run `bash scripts/build_universal_app.sh` with a full Xcode installation selected. It builds both architectures into `build/release-1.8.0/Teximo.app`, preserving development bundles. Sign the app with Developer ID and a secure timestamp, notarize and staple the app, then create, sign, notarize and staple the distribution DMG. Publish only after Gatekeeper validation succeeds. Run `bash scripts/package_homebrew_zip.sh` to package the stapled app and LICENSE into a ZIP for Homebrew. The LICENSE keeps the app bundle at the archive root during Homebrew staging. Publish the ZIP alongside the DMG and update both formulas with the ZIP's SHA256. Test a real `brew install`, the installed app's signature and notarization ticket, and `brew test dmrkv/teximo/teximo` before declaring the Homebrew update ready. Release notes are in `RELEASE_NOTES_1.8.0.md`.
 
 ## Prerequisites
 

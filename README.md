@@ -21,7 +21,15 @@ A seamless macOS menu bar app for keyboard layout switching and text manipulatio
 brew install dmrkv/teximo/teximo
 ```
 
-> **Note**: This installs Teximo from the Homebrew tap. Make sure you have Homebrew installed first.
+Quit any older Teximo copy, then launch the Homebrew-managed app:
+
+```bash
+open "$(brew --prefix teximo)/Teximo.app"
+```
+
+For an existing Homebrew installation, use `brew update` followed by `brew upgrade dmrkv/teximo/teximo`. If your previous copy came from a DMG or a development build, run `brew install` first; Homebrew cannot upgrade a copy it does not manage.
+
+If Homebrew reports an untrusted formula, run `brew trust --formula dmrkv/teximo/teximo` once, then retry. A fully qualified `brew install dmrkv/teximo/teximo` grants trust to that formula on Homebrew versions that require it.
 
 ### Option 2: Download from Releases
 1. Go to the [Releases](https://github.com/dmrkv/teximo/releases) page
