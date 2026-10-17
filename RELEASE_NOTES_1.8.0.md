@@ -1,0 +1,2 @@
+- Added native macOS translation for selected text.
+- Refreshed the Settings window.

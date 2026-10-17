@@ -105,8 +105,9 @@ class AccessibilityPermissionWindow: NSWindowController {
         // Description
         let descriptionLabel = NSTextField(wrappingLabelWithString: """
         Teximo needs accessibility permissions to:
-        • Switch keyboard layouts with ⌘+Shift
-        • Transliterate text with Ctrl+Shift
+        • Switch keyboard layouts
+        • Transliterate text
+        • Toggle text case
         
         Please follow the steps below to enable these permissions.
         """)
@@ -247,23 +248,23 @@ class AccessibilityPermissionWindow: NSWindowController {
             // Open Settings button
             openSettingsButton.topAnchor.constraint(equalTo: container.topAnchor),
             openSettingsButton.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            openSettingsButton.widthAnchor.constraint(equalToConstant: 180),
+            openSettingsButton.widthAnchor.constraint(equalToConstant: 240),
             openSettingsButton.heightAnchor.constraint(equalToConstant: 32),
             
-            // Check Again button
-            checkAgainButton.topAnchor.constraint(equalTo: openSettingsButton.bottomAnchor, constant: 8),
+            // Check Again button - bottom left
+            checkAgainButton.topAnchor.constraint(equalTo: openSettingsButton.bottomAnchor, constant: 16),
             checkAgainButton.leadingAnchor.constraint(equalTo: container.leadingAnchor),
-            checkAgainButton.widthAnchor.constraint(equalToConstant: 120),
-            checkAgainButton.heightAnchor.constraint(equalToConstant: 28),
+            checkAgainButton.widthAnchor.constraint(equalToConstant: 130),
+            checkAgainButton.heightAnchor.constraint(equalToConstant: 32),
             
-            // Quit button
-            quitButton.topAnchor.constraint(equalTo: openSettingsButton.bottomAnchor, constant: 8),
+            // Quit button - bottom right
+            quitButton.topAnchor.constraint(equalTo: openSettingsButton.bottomAnchor, constant: 16),
             quitButton.trailingAnchor.constraint(equalTo: container.trailingAnchor),
-            quitButton.widthAnchor.constraint(equalToConstant: 80),
-            quitButton.heightAnchor.constraint(equalToConstant: 28),
+            quitButton.widthAnchor.constraint(equalToConstant: 130),
+            quitButton.heightAnchor.constraint(equalToConstant: 32),
             
             // Container height
-            container.heightAnchor.constraint(equalToConstant: 80)
+            container.heightAnchor.constraint(equalToConstant: 90)
         ])
         
         return container

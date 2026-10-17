@@ -124,7 +124,9 @@ enum ModifierKey: String, Codable, CaseIterable {
 class TeximoSettings {
     static let shared = TeximoSettings()
     
-    private let defaults = UserDefaults.standard
+    private let defaults: UserDefaults
+
+    init(defaults: UserDefaults = .standard) { self.defaults = defaults }
     
     // Keys for UserDefaults
     private let layoutSwitchKey = "TeximoLayoutSwitchHotkey"
@@ -200,6 +202,65 @@ class TeximoSettings {
         }
     }
     
+    var translationHotkey: HotkeyConfig? {
+        get {
+            if let data = defaults.data(forKey: "TeximoTranslationHotkey") {
+                return try? JSONDecoder().decode(HotkeyConfig.self, from: data)
+            }
+            return defaults.bool(forKey: "hasSetTranslationHotkey") ? nil :
+                HotkeyConfig(modifiers: [.control, .option], keyCode: 17)
+        }
+        set {
+            defaults.set(true, forKey: "hasSetTranslationHotkey")
+            defaults.set(newValue.flatMap { try? JSONEncoder().encode($0) }, forKey: "TeximoTranslationHotkey")
+        }
+    }
+
+    var translationSource: String {
+        get {
+            if let stored = defaults.string(forKey: "TeximoTranslationSource"), !stored.isEmpty, stored != "auto" {
+                return stored
+            }
+            // Upgrade the old automatic-source setting to a concrete, reversible language pair.
+            let first: String
+            if !translationDownloadSource.isEmpty, translationDownloadSource != "auto", translationDownloadSource != translationTarget {
+                first = translationDownloadSource
+            } else {
+                first = translationTarget == "en" ? "de" : "en"
+            }
+            defaults.set(first, forKey: "TeximoTranslationSource")
+            return first
+        }
+        set { defaults.set(newValue, forKey: "TeximoTranslationSource") }
+    }
+    var translationTarget: String {
+        get { defaults.string(forKey: "TeximoTranslationTarget") ?? "de" }
+        set { defaults.set(newValue, forKey: "TeximoTranslationTarget") }
+    }
+
+    var translationDownloadSource: String {
+        get { defaults.string(forKey: "TeximoTranslationDownloadSource") ?? "" }
+        set { defaults.set(newValue, forKey: "TeximoTranslationDownloadSource") }
+    }
+
+    func hotkey(for action: TeximoAction) -> HotkeyConfig? {
+        switch action {
+        case .layout: return layoutSwitchHotkey
+        case .transliteration: return transliterationHotkey
+        case .caseToggle: return caseToggleHotkey
+        case .translation: return translationHotkey
+        }
+    }
+
+    func setHotkey(_ hotkey: HotkeyConfig?, for action: TeximoAction) {
+        switch action {
+        case .layout: layoutSwitchHotkey = hotkey
+        case .transliteration: transliterationHotkey = hotkey
+        case .caseToggle: caseToggleHotkey = hotkey
+        case .translation: translationHotkey = hotkey
+        }
+    }
+
     // Selected keyboard layouts
     var selectedLayout1: KeyboardLayout? {
         get {
@@ -253,10 +314,13 @@ class TeximoSettings {
     
     // Reset to defaults
     func resetToDefaults() {
-        defaults.removeObject(forKey: layoutSwitchKey)
-        defaults.removeObject(forKey: transliterationKey)
-        defaults.removeObject(forKey: caseToggleKey)
-        defaults.removeObject(forKey: selectedLayout1Key)
-        defaults.removeObject(forKey: selectedLayout2Key)
+        for key in [layoutSwitchKey, transliterationKey, caseToggleKey,
+                    "TeximoTranslationHotkey", "hasSetLayoutSwitchHotkey",
+                    "hasSetTransliterationHotkey", "hasSetCaseToggleHotkey",
+                    "hasSetTranslationHotkey", "TeximoTranslationSource", "TeximoTranslationTarget",
+                    "TeximoTranslationDownloadSource",
+                    selectedLayout1Key, selectedLayout2Key] {
+            defaults.removeObject(forKey: key)
+        }
     }
 }

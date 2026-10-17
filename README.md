@@ -5,7 +5,8 @@ A seamless macOS menu bar app for keyboard layout switching and text manipulatio
 ## Features
 
 - **⚙️ Customizable Shortcuts**: Configure your own keyboard shortcuts for all actions
-- **🎨 Settings Window**: Unified settings interface for shortcuts, layouts, and startup preferences
+- **🌍 Native Translation**: Translate selected text in editable fields with Apple Translation (macOS 15+)
+- **🎨 Settings Window**: Translucent sidebar with dedicated General, Transliteration, Translation, and Shortcuts pages
 - **⌨️ Smart Layout Switching**: Choose specific keyboard layouts for English and Russian
 - **🔄 Text Transliteration**: Convert selected text between English and Russian (Cyrillic)
 - **🔠 Case Toggle**: Cycle through lowercase, UPPERCASE, Title Case, and Sentence case
@@ -24,25 +25,9 @@ brew install dmrkv/teximo/teximo
 
 ### Option 2: Download from Releases
 1. Go to the [Releases](https://github.com/dmrkv/teximo/releases) page
-2. Download the latest `Teximo.dmg` file
+2. Download the latest `Teximo-x.x.x.dmg` file
 3. Open the DMG and drag Teximo to your Applications folder
-4. **🚨 IMPORTANT - Security Warning Fix:**
-   
-   When you first try to launch Teximo, macOS will show a security warning:
-   > "Teximo.app Not Opened"
-   <img width="372" height="344" alt="Screenshot 1" src="https://github.com/user-attachments/assets/6f606280-6f83-4cc0-a141-e013cacbaf69" />
-
-   
-   **To fix this, you MUST:**
-   - Go to MacOS Settings (Spotlight → System Settings)
-   - Click **"Open"** in the security dialog
-   - In the left sidebar find **Privacy and Security**, and then in the right side of the window find **Security** → "Teximo.app" was blocked to protect your Mac. Click on **Open anyway**
-     <img width="827" height="684" alt="Screenshot 2" src="https://github.com/user-attachments/assets/ec415ae2-20f7-4f4f-b71b-aa23f886f4a4" />
-   - When you run Teximo next time from Applications, click again on "Open anyway"
-     <img width="372" height="440" alt="Screenshot 3" src="https://github.com/user-attachments/assets/6d9de770-a6fd-4a98-a174-9f48d4887a10" />
-
-   This is a one-time step - after this, Teximo will launch normally!
-6. After that launch Teximo from Applications
+4. Launch Teximo from Applications and grant Accessibility access when prompted.
 
 ### Option 3: Build from Source
 1. Clone this repository
@@ -63,8 +48,9 @@ Once permissions are granted, Teximo will appear in your menu bar with a "T" ico
 
 ### Settings Window
 
-Click the menu bar icon and select **"Settings..."** to:
-- Customize keyboard shortcuts for layout switching, transliteration, and case toggle
+Click the menu bar icon and select **"Settings..."**. The translucent sidebar has **General**, **Transliteration**, **Translation**, and **Shortcuts** pages. Use them to:
+- Choose the two languages to translate between
+- Customize keyboard shortcuts for layout switching, transliteration, case toggle, and translation
 - Choose specific keyboard layouts for English and Russian
 - Enable/disable launching Teximo at macOS startup
 - Reset all settings to defaults
@@ -76,13 +62,39 @@ The app works globally in any application with these default shortcuts (customiz
 - **⌘⇧** (Cmd+Shift): Switch between keyboard layouts
 - **⌥⇧** (Option+Shift): Transliterate selected text between English and Russian
 - **⌃⇧** (Ctrl+Shift): Toggle case of selected text
+- **⌃⌥T** (Ctrl+Option+T): Translate selected text into the other language of your pair
+
+Release the keys to run an action. Modifier-only shortcuts do not run when used with other keys, such as when selecting text.
+
+### Translate a Selection
+
+1. Open **Settings → Translation**. Choose **First language** and **Second language**. The default pair is English ↔ German.
+2. Select text in an editable field in another app.
+3. Press **Control–Option–T** and release the keys. Teximo detects which language is selected and translates into the other one. English becomes German; select the German text and press the same shortcut to translate back to English.
+
+Translation runs on your Mac using Apple's Translation framework. Normal translation and transliteration replace the selection silently, without a progress window or focus change. If language files are missing, the translation panel offers **Download Languages…** and macOS settings instructions. Downloading needs an internet connection. After downloading, select the text again and use the shortcut. Settings shows **Language download needed** or **Language files downloaded** for the selected pair. Click **Download Languages…** to ask macOS to install missing files. If the native download cannot start, **Open Language & Region…** takes you to macOS settings; open **Translation Languages** there and download both languages. Supported languages come from the system rather than a fixed list.
+
+If you type, change the selection, or switch fields during translation, Teximo leaves the field alone and offers **Copy Translation**. Translation preserves all clipboard formats and avoids overwriting a new clipboard item copied while pasting.
+
+Accessibility access is required. Password fields, read-only content, and apps that do not expose selected text through Accessibility are not supported. Translation requires **macOS 15 or later**; the existing layout, transliteration, and case tools continue to support macOS 13–14.
+
+### Development Checks
+
+With a configured Xcode toolchain and its license accepted:
+
+```bash
+swift test
+xcodebuild -project Teximo.xcodeproj -scheme Teximo -configuration Debug -derivedDataPath /tmp/teximo-build CODE_SIGNING_ALLOWED=NO build
+```
+
+Tests cover shortcut release behavior, selection chords, disabled shortcuts, language persistence/reset, UTF-16 selection ranges, clipboard restoration, and delayed copy/paste delivery in editors that do not expose Accessibility selections. Before publishing, also test translation in TextEdit and a browser input, download status, consent/cancellation, and changing the selection while translation is running.
+
+The DMG, Developer ID signing/notarization, and Homebrew tap distribution remain in place. See [RELEASE_GUIDE.md](RELEASE_GUIDE.md) before publishing a new version; update the tap URL and checksum only after creating the signed release artifact.
 
 ## Troubleshooting
 
-### Alternative Method (if right-click doesn't work):
-1. Go to **System Preferences** → **Security & Privacy** → **Security**
-2. Look for a message about Teximo being blocked
-3. Click **"Open Anyway"**
+### "Damaged and can't be opened" Error
+See the **Security Setup** section under Option 2 installation above.
 
 ### Layout Switching Popover (macOS Sonoma and later)
 If you see a small popover appearing near your cursor when switching layouts, this is a macOS system feature introduced in Sonoma. Teximo uses direct system APIs that work instantly and don't depend on macOS keyboard shortcuts.

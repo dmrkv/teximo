@@ -2,6 +2,24 @@
 
 This guide explains how to release new versions of Teximo with both DMG and Homebrew distribution.
 
+## Translation release checks
+
+The app still supports macOS 13 and later. Native translation is enabled on macOS 15 and later, with Translation frameworks weak-linked so older systems can launch the existing tools. Build using an SDK that includes Translation (macOS 15+). Swift Package Manager uses Swift tools 6.2 or later.
+
+Before creating the next release:
+
+- Accept the installed Xcode license and run `swift test` plus a Release build for both Apple Silicon and Intel.
+- Grant Accessibility to the test build, download English/German using **Settings → Translation → Download Languages…**, and test selected text in TextEdit and a browser input.
+- Verify missing language files show a download action in both Settings and the translation panel. Test automatic source detection, another target language, same-language/unsupported pairs, cancelled downloads, and repeated translations.
+- While translating, type or change fields; the original input must remain untouched and **Copy Translation** should be offered.
+- Check a non-text clipboard item survives replacement, and a new clipboard copy is preserved.
+- Verify the sidebar and all four settings pages in light and dark mode.
+- Sign and notarize with Developer ID, then update the Homebrew tap URL/version/checksum to the exact published DMG. Local development bundles are not distribution artifacts.
+
+## Universal build for v1.8.0
+
+Run `bash scripts/build_universal_app.sh` with a full Xcode installation selected. It builds both architectures into `build/release-1.8.0/Teximo.app`, preserving development bundles. Sign the app with Developer ID and a secure timestamp, notarize and staple the app, then create, sign, notarize and staple the distribution DMG. Publish only after Gatekeeper validation succeeds. Update the formula in this repository and the Homebrew tap with the final stapled DMG's SHA256. Release notes are in `RELEASE_NOTES_1.8.0.md`.
+
 ## Prerequisites
 
 ### Required for Distribution

@@ -1,29 +1,16 @@
 import Cocoa
 import ServiceManagement
 
+@MainActor
 class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let statusMenu = NSMenu()
-    private var eventMonitor: Any?
-    private var transliterationTimer: Timer?
-    private var isSelectingText = false
+    private let shortcuts = GlobalShortcutMonitor()
+    private let translation = SelectionTranslationController()
     private var permissionWindow: AccessibilityPermissionWindow?
-    
-    // Track modifier state to detect releases
-    private var previousFlags: NSEvent.ModifierFlags = []
-    private var wasLayoutSwitchPressed = false
-    private var wasTransliterationPressed = false
-    private var wasCaseTogglePressed = false
-    
-    // Track press times for release-based triggers
-    private var transliterationPressTime: Date?
-    private var caseTogglePressTime: Date?
-    
-    // Track selection activity to avoid triggering after selection
-    private var lastSelectionChangeTime: Date = Date.distantPast
-    private var lastKnownSelection: String = ""
-    private var lastArrowKeyTime: Date = Date.distantPast
-    
+    private var textInteractionRevision = 0
+    private var isPerformingTextAction = false
+
     // Settings window
     private var settingsWindow: SettingsWindow?
     
@@ -82,7 +69,9 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         // Clear existing menu to prevent duplicates
         statusMenu.removeAllItems()
         
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        if statusItem == nil {
+            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        }
                 if let button = statusItem.button {
                     print("[Teximo] Status button created")
                     button.title = ""
@@ -116,6 +105,11 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
         caseItem.isEnabled = false
         statusMenu.addItem(caseItem)
         
+        let translationShortcut = TeximoSettings.shared.translationHotkey?.displayString ?? "Disabled"
+        let translationItem = NSMenuItem(title: "Translate Selection: \(translationShortcut)", action: nil, keyEquivalent: "")
+        translationItem.isEnabled = false
+        statusMenu.addItem(translationItem)
+
         statusMenu.addItem(NSMenuItem.separator())
 
         // Get app version
@@ -141,308 +135,49 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     }
     
     private func setupHotkeyDetection() {
-        print("[Teximo] Setting up hotkey detection")
-        
-        // Use NSEvent monitors for global hotkey detection
-        eventMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { [weak self] event in
-            if event.type == .flagsChanged {
-                self?.handleFlagsChanged(event)
-            } else if event.type == .keyDown {
-                self?.handleKeyDown(event)
+        translation.onOpenSettings = { [weak self] in self?.showSettingsWindow() }
+        shortcuts.onUserInteraction = { [weak self] in
+            self?.textInteractionRevision += 1
+            self?.translation.selectionMayHaveChanged()
+        }
+        shortcuts.onAction = { [weak self] action in
+            guard let self else { return }
+            switch action {
+            case .layout: self.switchLayout()
+            case .transliteration: self.transformSelectedText(Transliterator.transliterate)
+            case .caseToggle: self.transformSelectedText(CaseToggle.transform)
+            case .translation:
+                guard !self.isPerformingTextAction else { return }
+                self.translation.translateSelection()
             }
         }
-        
-        // Also monitor mouse events to detect selection activity
-        NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDragged, .rightMouseDragged]) { [weak self] _ in
-            self?.lastSelectionChangeTime = Date()
-        }
-        
-        if eventMonitor != nil {
-            print("[Teximo] Global event monitor created")
-        } else {
-            print("[Teximo] Failed to create global event monitor")
+        shortcuts.start()
+        if !shortcuts.canHandleKeyShortcuts {
+            showSettingsWindow()
+            settingsWindow?.showShortcutPermissionError()
         }
     }
-    
-    private func handleFlagsChanged(_ event: NSEvent) {
-        let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        
-        // Get current hotkey configurations
-        let settings = TeximoSettings.shared
-        
-        // Check for layout switch hotkey
-        if let layoutHotkey = settings.layoutSwitchHotkey {
-            let isLayoutSwitchPressed = layoutHotkey.matches(flags)
-            if !wasLayoutSwitchPressed && isLayoutSwitchPressed {
-                // Layout switch just pressed - trigger immediately
-                print("[Teximo] Layout switch hotkey detected")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Layout switch hotkey detected\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-                switchLayout()
-            }
-            wasLayoutSwitchPressed = isLayoutSwitchPressed
-        } else {
-            wasLayoutSwitchPressed = false
+
+    private func transformSelectedText(_ transform: @escaping (String) -> String) {
+        guard !isPerformingTextAction,
+              AccessibilityHelper.ensurePermission(promptIfNeeded: false) else { return }
+        isPerformingTextAction = true
+        translation.selectionMayHaveChanged()
+        let revision = textInteractionRevision
+        let environment = TextActions.Environment.live { [weak self] in
+            self?.textInteractionRevision == revision
         }
-        
-        // Check for transliteration hotkey - trigger on RELEASE
-        if let translitHotkey = settings.transliterationHotkey {
-            let isTransliterationPressed = translitHotkey.matches(flags)
-            if !wasTransliterationPressed && isTransliterationPressed {
-                // Transliteration hotkey just pressed - record time
-                transliterationPressTime = Date()
-                print("[Teximo] Transliteration hotkey PRESSED")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Transliteration hotkey PRESSED\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-            }
-            if wasTransliterationPressed && !isTransliterationPressed {
-                // Transliteration hotkey released
-                print("[Teximo] Transliteration hotkey RELEASED")
-                let logPath = "/tmp/teximo_debug.log"
-                let logMessage = "[Teximo] Transliteration hotkey RELEASED\n"
-                try? logMessage.write(toFile: logPath, atomically: true, encoding: .utf8)
-                
-                if let pressTime = transliterationPressTime {
-                    let holdDuration = Date().timeIntervalSince(pressTime)
-                    transliterationPressTime = nil
-                    
-                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                    
-                    print("[Teximo] Transliteration release: hold=\(holdDuration)s, sinceSelection=\(timeSinceSelection)s")
-                    
-                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                        print("[Teximo] Triggering transliteration")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            self?.checkAndTransliterateSelectedText()
-                        }
-                    }
-                }
-            }
-            wasTransliterationPressed = isTransliterationPressed
-        } else {
-            wasTransliterationPressed = false
-        }
-        
-        // Check for case toggle hotkey - trigger on RELEASE
-        if let caseHotkey = settings.caseToggleHotkey {
-            let isCaseTogglePressed = caseHotkey.matches(flags)
-            if !wasCaseTogglePressed && isCaseTogglePressed {
-                // Case toggle hotkey just pressed - record time
-                caseTogglePressTime = Date()
-                print("[Teximo] Case toggle hotkey PRESSED")
-            }
-            if wasCaseTogglePressed && !isCaseTogglePressed {
-                // Case toggle hotkey released
-                print("[Teximo] Case toggle hotkey RELEASED")
-                
-                if let pressTime = caseTogglePressTime {
-                    let holdDuration = Date().timeIntervalSince(pressTime)
-                    caseTogglePressTime = nil
-                    
-                    let timeSinceSelection = Date().timeIntervalSince(lastSelectionChangeTime)
-                    let timeSinceArrow = Date().timeIntervalSince(lastArrowKeyTime)
-                    
-                    if holdDuration < 0.5 && timeSinceSelection > 0.3 && timeSinceArrow > 0.3 {
-                        print("[Teximo] Triggering case toggle")
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                            self?.toggleCaseOfSelectedText()
-                        }
-                    }
-                }
-            }
-            wasCaseTogglePressed = isCaseTogglePressed
-        } else {
-            wasCaseTogglePressed = false
-        }
-        
-        // Update previous flags
-        previousFlags = flags
-    }
-    
-    private func handleKeyDown(_ event: NSEvent) {
-        // Track arrow keys to detect text selection activity
-        let arrowKeyCodes: [CGKeyCode] = [123, 124, 125, 126] // Left, Right, Down, Up
-        if arrowKeyCodes.contains(CGKeyCode(event.keyCode)) {
-            lastArrowKeyTime = Date()
-            // If modifiers are held, user is likely selecting text
-            let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if flags.contains(.shift) || flags.contains(.option) {
-                lastSelectionChangeTime = Date()
-            }
+        Task { [weak self] in
+            defer { self?.isPerformingTextAction = false }
+            let outcome = await TextActions.transformSelection(transform, environment: environment)
+            if outcome == .noSelection { NSLog("[Teximo] No selected text available for text action.") }
         }
     }
-    
-    private func checkAndTransliterateSelectedText() {
-        print("[Teximo] Checking for selected text before transliteration")
-        
-        // Small delay to ensure selection is complete after modifier release
-        usleep(100_000) // 100ms
-        
-        // Try Accessibility API first (no clipboard)
-        var selectedText: String? = AccessibilityHelper.getSelectedText()
-        var usedMethod = "Accessibility API"
-        
-        if selectedText == nil || selectedText!.isEmpty {
-            // Fallback: Use clipboard to READ text (will be restored immediately)
-            selectedText = getSelectedTextViaClipboard()
-            usedMethod = "Clipboard"
-            
-            guard let text = selectedText, !text.isEmpty else {
-                print("[Teximo] No text selected - skipping transliteration")
-                return
-            }
-        }
-        
-        guard let text = selectedText, !text.isEmpty else {
-            print("[Teximo] No text selected - doing nothing")
-            return
-        }
-        
-        // Check if selection changed recently (indicating active selection)
-        if text == lastKnownSelection {
-            let timeSinceChange = Date().timeIntervalSince(lastSelectionChangeTime)
-            if timeSinceChange < 0.5 {
-                print("[Teximo] Selection just changed - skipping transliteration")
-                return
-            }
-        }
-        lastKnownSelection = text
-        lastSelectionChangeTime = Date()
-        
-        // Only skip if the text is very short (likely not selected text)
-        if text.count < 2 {
-            print("[Teximo] Text too short - doing nothing")
-            return
-        }
-        
-        print("[Teximo] Selected text found: '\(text)' - proceeding with transliteration")
-        
-        // Ready to transliterate
-        
-        // Proceed with transliteration (uses keyboard simulation to replace)
-        transliterateSelectedText(selectedText: text)
-    }
-    
-    // Get selected text via clipboard (with immediate restoration)
-    private func getSelectedTextViaClipboard() -> String? {
-        let pasteboard = NSPasteboard.general
-        
-        // Save original clipboard
-        let originalClipboard = pasteboard.string(forType: .string) ?? ""
-        print("[Teximo] Saved original clipboard, using Cmd+C fallback")
-        
-        // Ensure modifiers are cleared
-        var attempts = 0
-        while attempts < 10 {
-            let flags = CGEventSource.flagsState(.combinedSessionState)
-            if !flags.contains(.maskCommand) && !flags.contains(.maskShift) && 
-               !flags.contains(.maskAlternate) && !flags.contains(.maskControl) {
-                break
-            }
-            usleep(20_000) // 20ms
-            attempts += 1
-        }
-        usleep(100_000) // Increased to 100ms delay
-        
-        // Clear clipboard first to ensure we get fresh content
-        pasteboard.clearContents()
-        usleep(50_000)
-        
-        // Send Cmd+C
-        AccessibilityHelper.performKeystroke(keyCode: 8, flags: .maskCommand)
-        usleep(300_000) // Increased to 300ms wait for copy to complete
-        
-        // Read from clipboard
-        let selectedText = pasteboard.string(forType: .string)
-        
-        // IMMEDIATELY restore original clipboard
-        pasteboard.clearContents()
-        pasteboard.setString(originalClipboard, forType: .string)
-        
-        print("[Teximo] Read text via clipboard (now restored): '\(selectedText ?? "")'")
-        
-        // Verify it's different from original (actually selected text)
-        if let text = selectedText, !text.isEmpty, text != originalClipboard {
-            return text
-        }
-        
-        return nil
-    }
-    
+
     private func switchLayout() {
-        print("[Teximo] Switching keyboard layout using TISSelectInputSource (silent)")
-        DispatchQueue.main.async {
-            SimpleLayoutSwitcher.switchLayout()
-        }
+        SimpleLayoutSwitcher.switchLayout()
     }
-    
-    private func transliterateSelectedText(selectedText: String) {
-        print("[Teximo] Transliterating selected text")
-        print("[Teximo] Selected text: '\(selectedText)'")
-        
-        // Transliterate the text
-        let transliteratedText = Transliterator.transliterate(selectedText)
-        print("[Teximo] Transliterated text: '\(transliteratedText)'")
-        
-        // Replace selected text with transliteration
-        let success = AccessibilityHelper.replaceSelectedText(with: transliteratedText)
-        
-        if success {
-            print("[Teximo] Text replacement completed")
-        } else {
-            print("[Teximo] Text replacement failed")
-        }
-    }
-    
-    private func toggleCaseOfSelectedText() {
-        print("[Teximo] Toggling case of selected text")
-        
-        // Small delay to ensure selection is complete after modifier release
-        usleep(100_000) // 100ms
-        
-        // Try Accessibility API first (no clipboard)
-        var selectedText: String? = AccessibilityHelper.getSelectedText()
-        
-        if selectedText == nil || selectedText!.isEmpty {
-            // Fallback: Use clipboard to READ text (will be restored immediately)
-            selectedText = getSelectedTextViaClipboard()
-            
-            guard let text = selectedText, !text.isEmpty else {
-                print("[Teximo] No text selected - skipping case toggle")
-                return
-            }
-        }
-        
-        guard let text = selectedText, !text.isEmpty else {
-            print("[Teximo] No text selected - doing nothing")
-            return
-        }
-        
-        // Only process if the text has letters
-        if text.count < 1 {
-            print("[Teximo] Text too short - doing nothing")
-            return
-        }
-        
-        print("[Teximo] Selected text found: '\(text)' - proceeding with case toggle")
-        
-        // Transform case
-        let transformedText = CaseToggle.transform(text)
-        print("[Teximo] Transformed text: '\(transformedText)'")
-        
-        // Replace selected text with transformed version
-        let success = AccessibilityHelper.replaceSelectedText(with: transformedText)
-        
-        if success {
-            print("[Teximo] Case toggle completed")
-        } else {
-            print("[Teximo] Case toggle failed")
-        }
-    }
-    
+
     @objc private func testLayoutSwitch() {
         print("[Teximo] Test layout switch triggered")
         let logPath = "/tmp/teximo_debug.log"
@@ -463,26 +198,6 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
             try? logMessage4.write(toFile: logPath, atomically: true, encoding: .utf8)
         }
     }
-    
-    @objc private func testTransliteration() {
-        print("[Teximo] Test transliteration triggered")
-        
-        // Check accessibility permissions first
-        let hasAccessibility = AccessibilityHelper.ensurePermission(promptIfNeeded: true)
-        print("[Teximo] Accessibility permission: \(hasAccessibility)")
-        
-        if hasAccessibility {
-            // Only use Accessibility API (no clipboard)
-            if let selectedText = AccessibilityHelper.getSelectedText(), !selectedText.isEmpty {
-                transliterateSelectedText(selectedText: selectedText)
-            } else {
-                print("[Teximo] No text selected for transliteration")
-            }
-        } else {
-            print("[Teximo] No accessibility permission, cannot transliterate text")
-        }
-    }
-    
     
     // MARK: - Layout Selection Menu Helpers
     
@@ -583,6 +298,10 @@ class SimpleAppDelegate: NSObject, NSApplicationDelegate {
     private func showSettingsWindow() {
         if settingsWindow == nil {
             settingsWindow = SettingsWindow()
+            settingsWindow?.onSettingsChanged = { [weak self] in
+                guard let self else { return }
+                self.setupStatusItem()
+            }
             settingsWindow?.onMenuBarVisibilityChanged = { [weak self] in
                 self?.updateMenuBarVisibility()
             }

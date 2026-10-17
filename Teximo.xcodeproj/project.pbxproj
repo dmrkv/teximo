@@ -27,6 +27,9 @@
 		D7D0036A43B5A151D61470D9 /* SimpleHotkeyDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064A97C6635E16FC83598C29 /* SimpleHotkeyDetector.swift */; };
 		EDC581511B8EC6D69ADB87FF /* SimpleAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D0A5EC2C5FF2CEF75110B7A /* SimpleAppDelegate.swift */; };
 		F9AE8FC86F574ADB9141DC91 /* SimpleHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6D82A1E8638FC92C1A251A2 /* SimpleHotkeyManager.swift */; };
+		BB0000000000000000000000 /* GlobalShortcutMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000000 /* GlobalShortcutMonitor.swift */; };
+		BB0000000000000000000001 /* SelectionTranslationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000001 /* SelectionTranslationController.swift */; };
+		BB0000000000000000000002 /* TranslationLanguages.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000002 /* TranslationLanguages.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +55,9 @@
 		E6C8D2685726CBC257BBFA05 /* AccessibilityPermissionWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPermissionWindow.swift; sourceTree = "<group>"; };
 		F8E053317EF7AF58AA3FACD9 /* IconGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconGenerator.swift; sourceTree = "<group>"; };
 		F91586DB4C4F5A786B5F2AF5 /* Transliterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transliterator.swift; sourceTree = "<group>"; };
+		AA0000000000000000000000 /* GlobalShortcutMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcutMonitor.swift; sourceTree = "<group>"; };
+		AA0000000000000000000001 /* SelectionTranslationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionTranslationController.swift; sourceTree = "<group>"; };
+		AA0000000000000000000002 /* TranslationLanguages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationLanguages.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -66,6 +72,9 @@
 		484CA8F16F54D0EDE853E23B /* Teximo */ = {
 			isa = PBXGroup;
 			children = (
+				AA0000000000000000000000 /* GlobalShortcutMonitor.swift */,
+				AA0000000000000000000001 /* SelectionTranslationController.swift */,
+				AA0000000000000000000002 /* TranslationLanguages.swift */,
 				98EFA333F86EA62BB228E9B3 /* AccessibilityHelper.swift */,
 				E6C8D2685726CBC257BBFA05 /* AccessibilityPermissionWindow.swift */,
 				E4E75ABD2C2EDAC217924459 /* AppIcon.iconset */,
@@ -171,6 +180,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BB0000000000000000000000 /* GlobalShortcutMonitor.swift in Sources */,
+				BB0000000000000000000001 /* SelectionTranslationController.swift in Sources */,
+				BB0000000000000000000002 /* TranslationLanguages.swift in Sources */,
 				8D79ACE5DE14C4572E7DE940 /* AccessibilityHelper.swift in Sources */,
 				B7B00E98D3C23630FDF14717 /* AccessibilityPermissionWindow.swift in Sources */,
 				82511E26FB4A956AE299C45B /* AppIconGenerator.swift in Sources */,
@@ -202,14 +214,14 @@
 				CODE_SIGN_ENTITLEMENTS = Teximo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = Sources/Teximo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.7.2;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.teximo.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -285,14 +297,14 @@
 				CODE_SIGN_ENTITLEMENTS = Teximo.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				INFOPLIST_FILE = Sources/Teximo/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.7.2;
+				MARKETING_VERSION = 1.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.teximo.app;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;

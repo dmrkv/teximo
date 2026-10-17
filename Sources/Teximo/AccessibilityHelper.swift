@@ -2,6 +2,7 @@ import Cocoa
 import ApplicationServices
 
 enum AccessibilityHelper {
+    static let syntheticEventTag: Int64 = 0x544558494D4F
     static func ensurePermission(promptIfNeeded: Bool = true) -> Bool {
         // Access kAXTrustedCheckOptionPrompt outside concurrency context
         let key = kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String
@@ -14,9 +15,11 @@ enum AccessibilityHelper {
         guard ensurePermission(promptIfNeeded: false) else { return }
         let src = CGEventSource(stateID: .hidSystemState)
         let down = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: true)
+        down?.setIntegerValueField(.eventSourceUserData, value: syntheticEventTag)
         down?.flags = flags
         down?.post(tap: .cghidEventTap)
         let up = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: false)
+        up?.setIntegerValueField(.eventSourceUserData, value: syntheticEventTag)
         up?.flags = flags
         up?.post(tap: .cghidEventTap)
     }
@@ -46,75 +49,11 @@ enum AccessibilityHelper {
             }
         }
         
-        guard result == .success else { return nil }
-        let element = focusedElement as! AXUIElement
-        
-        // Try to get selected text
-        var selectedText: AnyObject?
-        result = AXUIElementCopyAttributeValue(element, kAXSelectedTextAttribute as CFString, &selectedText)
-        
-        if result == .success, let text = selectedText as? String, !text.isEmpty {
-            return text
-        }
-        
-        // Fallback: try getting selected text range
-        var selectedTextRange: AnyObject?
-        result = AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, &selectedTextRange)
-        if result == .success, let range = selectedTextRange {
-            var value: AnyObject?
-            result = AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &value)
-            if result == .success, let fullText = value as? String {
-                // Parse the range and extract selected text
-                if let rangeDict = range as? [String: Any],
-                   let loc = rangeDict["location"] as? Int,
-                   let len = rangeDict["length"] as? Int,
-                   loc >= 0, len > 0, loc + len <= fullText.count {
-                    let startIndex = fullText.index(fullText.startIndex, offsetBy: loc)
-                    let endIndex = fullText.index(startIndex, offsetBy: len)
-                    return String(fullText[startIndex..<endIndex])
-                }
-            }
-        }
-        
-        return nil
+        guard result == .success, let focusedElement,
+              CFGetTypeID(focusedElement) == AXUIElementGetTypeID() else { return nil }
+        return EditableSelection.selectedText(focusedElement as! AXUIElement)
     }
-    
-    // Replace selected text using keyboard simulation (works universally in all apps)
-    static func replaceSelectedText(with newText: String) -> Bool {
-        guard ensurePermission(promptIfNeeded: false) else { return false }
-        
-        // Always use keyboard simulation for universal compatibility
-        // This works in ALL apps including Slack, Antigravity, Figma, etc.
-        // The Accessibility API claims success but doesn't actually work in many apps
-        return replaceSelectedTextWithKeyboard(newText)
-    }
-    
-    // Universal text replacement using keyboard simulation only (no Accessibility API required)
-    // This works in ALL apps that accept keyboard input
-    static func replaceSelectedTextWithKeyboard(_ newText: String) -> Bool {
-        guard ensurePermission(promptIfNeeded: false) else { return false }
-        
-        // Save original clipboard
-        let pasteboard = NSPasteboard.general
-        let originalClipboard = pasteboard.string(forType: .string) ?? ""
-        
-        // Put transliterated text on clipboard
-        pasteboard.clearContents()
-        pasteboard.setString(newText, forType: .string)
-        usleep(50_000) // Wait for clipboard to update
-        
-        // Paste with Cmd+V directly over selected text
-        // When text is selected, Cmd+V automatically replaces it (no delete needed)
-        performKeystroke(keyCode: 9, flags: .maskCommand) // Cmd+V
-        usleep(100_000) // Wait for paste to complete
-        
-        // Restore original clipboard
-        pasteboard.clearContents()
-        pasteboard.setString(originalClipboard, forType: .string)
-        
-        return true
-    }
-    
+
     // Type a Unicode string character by character using CGEvent
     // Made public so it can be used by keyboard simulation fallback
     static func typeUnicodeString(_ text: String) {
